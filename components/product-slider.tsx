@@ -11,12 +11,16 @@ interface ProductSliderProps {
   products: Product[];
   title?: string;
   infinite?: boolean;
+  autoPlay?: boolean;
 }
 
-export default function ProductSlider({ products, title, infinite = true }: ProductSliderProps) {
+export default function ProductSlider({ products, title, infinite = true, autoPlay = true }: ProductSliderProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
+  const [isHovered, setIsHovered] = useState(false);
+  const autoPlayRef = useRef<NodeJS.Timeout>();
+
   const { addItem } = useCart();
   const { toast } = useToast();
 
@@ -52,22 +56,42 @@ export default function ProductSlider({ products, title, infinite = true }: Prod
   useEffect(() => {
     checkScroll();
     const container = containerRef.current;
-    container?.addEventListener('scroll', checkScroll);
-    window.addEventListener('resize', checkScroll);
+
+    const handleScroll = () => checkScroll();
+
+    container?.addEventListener('scroll', handleScroll);
+    window.addEventListener('resize', handleScroll);
+
     return () => {
-      container?.removeEventListener('scroll', checkScroll);
-      window.removeEventListener('resize', checkScroll);
+      container?.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleScroll);
     };
   }, []);
 
+  // Auto-play logic
+  useEffect(() => {
+    if (autoPlay && infinite && !isHovered) {
+      autoPlayRef.current = setInterval(() => {
+        scroll('right');
+      }, 4000); // Slide every 4 seconds
+    }
+
+    return () => {
+      if (autoPlayRef.current) clearInterval(autoPlayRef.current);
+    };
+  }, [autoPlay, infinite, isHovered]);
+
   const handleAddToCart = (product: Product) => {
+    // Helper to safely parse float
+    const parsePrice = (price: string | number) => typeof price === 'string' ? parseFloat(price) : price;
+
     addItem({
-      id: product.id,
+      id: product.id.toString(),
       name: product.name,
-      price: product.price,
+      price: parsePrice(product.price),
       quantity: 1,
-      size: product.sizes[0],
-      color: product.colors[0],
+      size: 'M', // Default as not in API
+      color: 'Default', // Default as not in API
       image: product.images[0],
     });
     toast({
@@ -78,32 +102,40 @@ export default function ProductSlider({ products, title, infinite = true }: Prod
 
   return (
     <div className="w-full">
-      {title && (
-        <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-4">
+        {title ? (
           <h2 className="text-3xl font-serif font-bold text-foreground">{title}</h2>
-          <div className="flex gap-2">
-            <button
-              onClick={() => scroll('left')}
-              disabled={!canScrollLeft && !infinite}
-              className="p-2 hover:bg-secondary/30 rounded-full transition disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              <ChevronLeft className="h-5 w-5 text-foreground" />
-            </button>
-            <button
-              onClick={() => scroll('right')}
-              disabled={!canScrollRight && !infinite}
-              className="p-2 hover:bg-secondary/30 rounded-full transition disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              <ChevronRight className="h-5 w-5 text-foreground" />
-            </button>
-          </div>
-        </div>
-      )}
+        ) : <div />} {/* Spacer if no title to keep arrows right */}
 
-      <div className="relative">
+        {/* Navigation Buttons */}
+        <div className="flex gap-2">
+          <button
+            onClick={() => scroll('left')}
+            disabled={!canScrollLeft && !infinite}
+            className="p-2 bg-secondary/50 hover:bg-secondary rounded-full transition disabled:opacity-40 disabled:cursor-not-allowed"
+            aria-label="Previous slide"
+          >
+            <ChevronLeft className="h-5 w-5 text-foreground" />
+          </button>
+          <button
+            onClick={() => scroll('right')}
+            disabled={!canScrollRight && !infinite}
+            className="p-2 bg-secondary/50 hover:bg-secondary rounded-full transition disabled:opacity-40 disabled:cursor-not-allowed"
+            aria-label="Next slide"
+          >
+            <ChevronRight className="h-5 w-5 text-foreground" />
+          </button>
+        </div>
+      </div>
+
+      <div
+        className="relative"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
         <div
           ref={containerRef}
-          className="flex gap-6 overflow-x-auto scroll-smooth no-scrollbar"
+          className="flex gap-6 overflow-x-auto scroll-smooth no-scrollbar py-4"
           style={{
             scrollBehavior: 'smooth',
             WebkitOverflowScrolling: 'touch',

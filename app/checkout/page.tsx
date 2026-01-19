@@ -312,19 +312,19 @@ export default function CheckoutPage() {
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Shipping</span>
                   <span className="font-medium text-foreground">
-                    {totalPrice > 50 ? 'FREE' : '$10.00'}
+                    {totalPrice > 50 ? 'FREE' : '৳10.00'}
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Tax</span>
                   <span className="font-medium text-foreground">
-                    ${((totalPrice + (totalPrice > 50 ? 0 : 10)) * 0.1).toFixed(2)}
+                    ৳{((totalPrice + (totalPrice > 50 ? 0 : 10)) * 0.1).toFixed(2)}
                   </span>
                 </div>
                 <div className="flex justify-between text-lg font-bold border-t border-border pt-3">
                   <span className="text-foreground">Total</span>
                   <span className="text-primary">
-                    ${(totalPrice + (totalPrice > 50 ? 0 : 10) + (totalPrice + (totalPrice > 50 ? 0 : 10)) * 0.1).toFixed(2)}
+                    ৳{(totalPrice + (totalPrice > 50 ? 0 : 10) + (totalPrice + (totalPrice > 50 ? 0 : 10)) * 0.1).toFixed(2)}
                   </span>
                 </div>
               </div>

@@ -35,7 +35,7 @@ export default function Header({ categories = [] }: HeaderProps) {
             {/* Logo */}
             <Link href="/" className="flex-shrink-0 group">
               <div className="text-xl font-serif font-bold text-foreground group-hover:text-primary transition-colors">
-                StyleHub
+                Fabble
               </div>
             </Link>
 
@@ -59,7 +59,7 @@ export default function Header({ categories = [] }: HeaderProps) {
               )}
 
               {/* Language Selector */}
-              <Popover>
+              {/* <Popover>
                 <PopoverTrigger asChild>
                   <Button variant="ghost" size="sm" className="text-xs font-medium hover:bg-secondary/50">
                     {language}
@@ -77,7 +77,7 @@ export default function Header({ categories = [] }: HeaderProps) {
                     </button>
                   ))}
                 </PopoverContent>
-              </Popover>
+              </Popover> */}
 
               {/* Cart Button */}
               <Button

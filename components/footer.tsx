@@ -89,18 +89,17 @@ export default function Footer() {
             <h4 className="font-semibold text-background text-sm uppercase tracking-wider">Get in Touch</h4>
             <ul className="space-y-3 text-sm text-background/70">
               <li>
-                <a href="mailto:info@stylehub.com" className="hover:text-background transition">
-                  info@stylehub.com
+                <a href="mailto:fashionfabble@gmail.com" className="hover:text-background transition">
+                  fashionfabble@gmail.com
                 </a>
               </li>
               <li>
-                <a href="tel:+15551234567" className="hover:text-background transition">
-                  +1 (555) 123-4567
+                <a href="tel:+8801624257024" className="hover:text-background transition">
+                  +8801624257024
                 </a>
               </li>
               <li className="text-background/70">
-                123 Fashion Street<br />
-                New York, NY 10001
+                280/3 Kollyanpur, Dhaka, Bangladesh
               </li>
             </ul>
           </div>
@@ -111,7 +110,7 @@ export default function Footer() {
 
         {/* Bottom */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-8 pt-8 text-sm text-background/60">
-          <p>&copy; 2025 StyleHub. All rights reserved.</p>
+          <p>&copy; 2025 Fabble. All rights reserved.</p>
           <div className="flex gap-6">
             <Link href="#" className="hover:text-background transition">
               Terms

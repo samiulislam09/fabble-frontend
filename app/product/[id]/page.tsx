@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   return {
-    title: `${product.name} | StyleHub`,
+    title: `${product.name} | Fabble`,
     description: product.metaDescription || product.shortDescription,
   };
 }

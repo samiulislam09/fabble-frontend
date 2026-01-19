@@ -1,5 +1,6 @@
 import { getProducts } from '@/lib/products';
 import { getCategories } from '@/lib/categories';
+import { getCarousels } from '@/lib/carousels';
 import ProductCard from '@/components/product-card';
 import ProductSlider from '@/components/product-slider';
 import HeroSlider from '@/components/hero-slider';
@@ -14,6 +15,8 @@ export default async function Home() {
   const categoriesResponse = await getCategories();
   const categories = categoriesResponse?.categories || [];
 
+  const carousels = await getCarousels();
+
   const trendingProducts = products.filter((p) => p.isFeatured); // Mapping isFeatured to trending for now as isTrending isn't on API types explicitly or usage needs verification
   const bestSellerProducts = products.filter((p) => p.isFeatured); // Reuse featured for demo if fields missing
   const allProducts = products;
@@ -21,7 +24,7 @@ export default async function Home() {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Slider Section */}
-      <HeroSlider />
+      <HeroSlider carousels={carousels} />
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 space-y-24">
