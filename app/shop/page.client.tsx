@@ -1,6 +1,7 @@
 'use client';
 
 import { Product } from '@/lib/products';
+import { Category } from '@/lib/categories';
 import { useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import ProductCard from '@/components/product-card';
@@ -15,9 +16,10 @@ const parsePrice = (price: string | number) => typeof price === 'string' ? parse
 
 interface ShopClientProps {
     initialProducts: Product[];
+    initialCategories: Category[];
 }
 
-export default function ShopClient({ initialProducts }: ShopClientProps) {
+export default function ShopClient({ initialProducts, initialCategories }: ShopClientProps) {
     const searchParams = useSearchParams();
     const { addItem } = useCart();
     const { toast } = useToast();
@@ -26,9 +28,6 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
 
     // Filter states
     const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || '');
-    // Subcategory logic might need adjustment based on real data structure, currently Product has category: ProductCategory object.
-    // The 'category' on product is object, but 'categoryId' is ID.
-    // The filter UI expects string names probably.
 
     const [selectedSubcategory, setSelectedSubcategory] = useState(searchParams.get('subcategory') || '');
     const [priceRange, setPriceRange] = useState([0, 250]);
@@ -36,11 +35,13 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
     const [sortBy, setSortBy] = useState('newest');
     const [showFilters, setShowFilters] = useState(false);
 
-    // Get unique values for filters
-    const categories = Array.from(new Set(products.map((p) => p.category.name)));
-    // Naive subcategory extraction if available, simplified for now as API response doesn't strictly have subcategory field on Product, 
-    // but maybe we can mock or ignore if not present. The user JSON didn't show 'subcategory' field on Product top level, only category object.
-    // We will iterate and see if we can derive it.
+    // Use passed categories (filter validation could happen here if needed)
+    // Flatten categories or just use top level? Usually sidebar shows structure or flat list.
+    // For now, let's just use the top-level categories passed.
+    // user might want all flat for simple filter or nested. 
+    // The previous code was flat list of names. Let's keep it simple: filter by top level category name.
+
+    const categories = initialCategories.filter(c => c.parentId === null);
 
     const subcategories: string[] = []; // Placeholder as subcategory missing in new Type
 
@@ -120,15 +121,15 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
                                 </button>
                                 {categories.map((category) => (
                                     <button
-                                        key={category}
+                                        key={category.id}
                                         onClick={() => {
-                                            setSelectedCategory(category);
+                                            setSelectedCategory(category.name);
                                             setSelectedSubcategory('');
                                         }}
-                                        className={`block w-full text-left px-3 py-2 rounded-lg transition ${selectedCategory === category ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
+                                        className={`block w-full text-left px-3 py-2 rounded-lg transition ${selectedCategory === category.name ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
                                             }`}
                                     >
-                                        {category}
+                                        {category.name}
                                     </button>
                                 ))}
                             </div>
@@ -147,8 +148,8 @@ export default function ShopClient({ initialProducts }: ShopClientProps) {
                                     className="w-full"
                                 />
                                 <div className="flex justify-between text-sm text-muted-foreground">
-                                    <span>${priceRange[0].toFixed(0)}</span>
-                                    <span>${priceRange[1].toFixed(0)}</span>
+                                    <span>৳{priceRange[0].toFixed(0)}</span>
+                                    <span>৳{priceRange[1].toFixed(0)}</span>
                                 </div>
                             </div>
                         </div>

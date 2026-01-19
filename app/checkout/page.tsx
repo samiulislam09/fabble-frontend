@@ -307,7 +307,7 @@ export default function CheckoutPage() {
               <div className="space-y-3 border-t border-border pt-6">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Subtotal</span>
-                  <span className="font-medium text-foreground">${totalPrice.toFixed(2)}</span>
+                  <span className="font-medium text-foreground">৳{totalPrice.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Shipping</span>

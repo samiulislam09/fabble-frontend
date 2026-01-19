@@ -143,11 +143,11 @@ export default function ProductDetailsClient({ product, relatedProducts }: Produ
                     {/* Price */}
                     <div className="space-y-2">
                         <div className="flex items-center gap-4">
-                            <span className="text-4xl font-bold text-primary">${price.toFixed(2)}</span>
+                            <span className="text-4xl font-bold text-primary">৳{price.toFixed(2)}</span>
                             {comparePrice && (
                                 <>
-                                    <span className="text-lg line-through text-muted-foreground">${comparePrice.toFixed(2)}</span>
-                                    <span className="text-lg font-semibold text-secondary">Save ${(comparePrice - price).toFixed(2)}</span>
+                                    <span className="text-lg line-through text-muted-foreground">৳{comparePrice.toFixed(2)}</span>
+                                    <span className="text-lg font-semibold text-secondary">Save ৳{(comparePrice - price).toFixed(2)}</span>
                                 </>
                             )}
                         </div>
@@ -166,8 +166,8 @@ export default function ProductDetailsClient({ product, relatedProducts }: Produ
                                     key={size}
                                     onClick={() => setSelectedSize(size)}
                                     className={`px-4 py-2 rounded-lg border-2 transition font-medium ${selectedSize === size
-                                            ? 'border-primary bg-primary text-primary-foreground'
-                                            : 'border-border bg-white text-foreground hover:border-primary'
+                                        ? 'border-primary bg-primary text-primary-foreground'
+                                        : 'border-border bg-white text-foreground hover:border-primary'
                                         }`}
                                 >
                                     {size}
@@ -190,8 +190,8 @@ export default function ProductDetailsClient({ product, relatedProducts }: Produ
                                                     <button
                                                         onClick={() => setSelectedColor(color)}
                                                         className={`w-12 h-12 rounded-full border-3 transition transform hover:scale-110 ${selectedColor === color
-                                                                ? 'border-primary shadow-lg'
-                                                                : 'border-border hover:border-primary/50'
+                                                            ? 'border-primary shadow-lg'
+                                                            : 'border-border hover:border-primary/50'
                                                             }`}
                                                         style={{ backgroundColor: hexColor }}
                                                         title={color}
@@ -230,19 +230,19 @@ export default function ProductDetailsClient({ product, relatedProducts }: Produ
                             <ShoppingCart className="h-5 w-5 mr-2" />
                             Add to Cart
                         </Button>
-                        <button
+                        {/* <button
                             onClick={() => setIsWishlisted(!isWishlisted)}
                             className="px-6 py-3 rounded-lg border border-border hover:bg-muted transition"
                         >
                             <Heart className={`h-5 w-5 ${isWishlisted ? 'fill-destructive text-destructive' : 'text-foreground'}`} />
-                        </button>
+                        </button> */}
                     </div>
 
                     {/* Product Info */}
                     <div className="border-t border-border pt-6 space-y-3">
                         <div className="flex items-center gap-3">
                             <Check className="h-5 w-5 text-green-600" />
-                            <span className="text-sm text-foreground">Free shipping on orders over $50</span>
+                            <span className="text-sm text-foreground">Free shipping on orders over ৳5550</span>
                         </div>
                         <div className="flex items-center gap-3">
                             <Check className="h-5 w-5 text-green-600" />

@@ -43,7 +43,7 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                         <p className="text-xs text-muted-foreground">
                           {item.color} | Size: {item.size}
                         </p>
-                        <p className="text-sm font-semibold text-primary mt-1">${item.price.toFixed(2)}</p>
+                        <p className="text-sm font-semibold text-primary mt-1">৳{item.price.toFixed(2)}</p>
 
                         {/* Quantity Controls */}
                         <div className="flex items-center gap-2 mt-2">
@@ -85,7 +85,7 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
             <div className="space-y-4">
               <div className="flex items-center justify-between text-lg font-semibold">
                 <span>Total:</span>
-                <span className="text-primary">${totalPrice.toFixed(2)}</span>
+                <span className="text-primary">৳{totalPrice.toFixed(2)}</span>
               </div>
               <div className="space-y-2">
                 <Link href="/checkout" onClick={onClose} className="block">

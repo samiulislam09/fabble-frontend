@@ -1,6 +1,7 @@
 
-import { getProducts } from '@/lib/products';
+import { getProducts, getProduct } from '@/lib/products';
 import ProductDetailsClient from './page.client';
+import { Metadata } from 'next';
 
 interface PageProps {
   params: {
@@ -8,12 +9,32 @@ interface PageProps {
   };
 }
 
-export default async function ProductDetailsPage({ params }: PageProps) {
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = params;
-  const productsResponse = await getProducts();
-  const products = productsResponse?.products || [];
+  const product = await getProduct(id);
 
-  const product = products.find((p) => p.id.toString() === id);
+  console.log(product, "product");
+
+  if (!product) {
+    return {
+      title: 'Product Not Found',
+    };
+  }
+
+  return {
+    title: `${product.name} | StyleHub`,
+    description: product.metaDescription || product.shortDescription,
+  };
+}
+
+export default async function ProductDetailsPage({ params }: PageProps) {
+  const { id } = await params;
+  const product = await getProduct(id);
+
+  // Fetch all products to find related ones (simplified recommendation logic)
+  // In a real app, you might have a dedicated related products endpoint
+  const productsResponse = await getProducts();
+  const allProducts = productsResponse?.products || [];
 
   if (!product) {
     return (
@@ -23,7 +44,7 @@ export default async function ProductDetailsPage({ params }: PageProps) {
     );
   }
 
-  const relatedProducts = products
+  const relatedProducts = allProducts
     .filter((p) => p.categoryId === product.categoryId && p.id !== product.id)
     .slice(0, 4);
 

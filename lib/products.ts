@@ -100,4 +100,29 @@ export const getProducts = async (): Promise<ProductsResponse | undefined> => {
   }
 };
 
+export interface ProductResponse {
+  product: Product;
+}
+
+export const getProduct = async (id: string): Promise<Product | undefined> => {
+  const apiUrl = process.env.APP_API_URL;
+  const baseUrl = apiUrl?.startsWith('http') ? apiUrl : `http://${apiUrl}`;
+
+  if (!apiUrl) {
+    console.error('APP_API_URL is not defined');
+    return undefined;
+  }
+
+  const url = `${baseUrl}/products/${id}`;
+
+  try {
+    const response = await getRequest<ProductResponse>(url);
+    // The API returns { product: { ... } }
+    return (response as unknown as ProductResponse)?.product;
+  } catch (error) {
+    console.error(`Failed to fetch product ${id}:`, error);
+    return undefined;
+  }
+};
+
 

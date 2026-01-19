@@ -21,7 +21,7 @@ export default function SearchBar({ isMobile = false, onSearch }: SearchBarProps
   const searchRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    fetch('/api/products-proxy')
+    fetch('/api/products')
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) {
@@ -94,7 +94,7 @@ export default function SearchBar({ isMobile = false, onSearch }: SearchBarProps
                     <img src={product.images[0] || "/placeholder.svg"} alt={product.name} className="w-12 h-12 object-cover rounded" />
                     <div className="flex-1">
                       <p className="font-medium text-sm text-foreground line-clamp-1">{product.name}</p>
-                      <p className="text-xs text-muted-foreground">${parseFloat(product.price).toFixed(2)}</p>
+                      <p className="text-xs text-muted-foreground">৳{parseFloat(product.price).toFixed(2)}</p>
                     </div>
                   </Link>
                 ))}
@@ -137,7 +137,7 @@ export default function SearchBar({ isMobile = false, onSearch }: SearchBarProps
                   <img src={product.images[0] || "/placeholder.svg"} alt={product.name} className="w-12 h-12 object-cover rounded flex-shrink-0" />
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-sm text-foreground line-clamp-1">{product.name}</p>
-                    <p className="text-xs text-muted-foreground">${parseFloat(product.price).toFixed(2)}</p>
+                    <p className="text-xs text-muted-foreground">৳{parseFloat(product.price).toFixed(2)}</p>
                   </div>
                 </Link>
               ))}
