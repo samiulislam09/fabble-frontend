@@ -34,7 +34,7 @@ const defaultSlides = [
 
 export default function HeroSlider({ carousels = [] }: HeroSliderProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const autoPlayRef = useRef<NodeJS.Timeout>();
+  const autoPlayRef = useRef<NodeJS.Timeout | null>(null);
 
   const slides = carousels.length > 0 ? carousels : defaultSlides;
 
@@ -57,6 +57,8 @@ export default function HeroSlider({ carousels = [] }: HeroSliderProps) {
   };
 
   const slide = slides[currentSlide];
+
+  console.log(slide);
 
   return (
     <section className={`relative w-full h-[600px] md:h-[700px] flex items-center justify-center overflow-hidden transition-all duration-500`}>

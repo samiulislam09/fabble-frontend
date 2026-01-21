@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { Facebook, Twitter, Instagram, Linkedin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import Image from 'next/image';
 
 export default function Footer() {
   return (
@@ -10,7 +11,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
           {/* Brand */}
           <div className="space-y-4">
-            <h3 className="font-serif text-2xl font-bold text-background">StyleHub</h3>
+            <Image height={100} width={100} src="/fabble.png" alt="Fabble" className="h-26 w-auto brightness-0 invert" />
             <p className="text-background/70 text-sm leading-relaxed">
               Curating premium fashion that celebrates individuality and timeless elegance.
             </p>

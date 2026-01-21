@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 
 export default function CheckoutPage() {
@@ -36,6 +36,19 @@ export default function CheckoutPage() {
 
   const [isProcessing, setIsProcessing] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
+  const [locations, setLocations] = useState<{ division: string; district: string }[]>([]);
+
+  useEffect(() => {
+    fetch('/cities.json')
+      .then(res => res.json())
+      .then(data => setLocations(data))
+      .catch(err => console.error('Failed to load cities:', err));
+  }, []);
+
+  const uniqueDivisions = Array.from(new Set(locations.map(l => l.division)));
+  const availableDistricts = locations
+    .filter(l => l.division === formData.state)
+    .map(l => l.district);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -46,16 +59,52 @@ export default function CheckoutPage() {
     e.preventDefault();
     setIsProcessing(true);
 
-    // Simulate processing
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    try {
+      const userToken = localStorage.getItem('x_auth_token'); // Assuming token is stored here based on apiRoute.ts
 
-    setIsProcessing(false);
-    setOrderPlaced(true);
-    clearCart();
-    toast({
-      title: 'Order Placed Successfully',
-      description: 'Your order has been received. You will receive an email confirmation shortly.',
-    });
+      const payload = {
+        items: items.map(item => ({
+          productId: item.productId || parseInt(item.id), // Fallback if id is numeric, though productId should be there now
+          variantId: item.variantId || 0,
+          quantity: item.quantity
+        })),
+        shippingAddress: formData.address,
+        shippingCity: formData.city,
+        shippingCountry: "Bangladesh",
+        shippingMethod: "STANDARD", // Hardcoded for simplified flow or add selector
+        paymentMethod: "CASH_ON_DELIVERY", // Hardcoded or add selector
+        customerNotes: "Please call before delivery", // Could be a form field
+        couponCode: "" // Could be a form field
+      };
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_APP_API_URL || 'http://localhost:5001'}/api/orders/direct`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to place order');
+      }
+
+      setIsProcessing(false);
+      setOrderPlaced(true);
+      clearCart();
+      toast({
+        title: 'Order Placed Successfully',
+        description: 'Your order has been received. You will receive an email confirmation shortly.',
+      });
+    } catch (error) {
+      console.error('Order placement error:', error);
+      setIsProcessing(false);
+      toast({
+        title: 'Order Failed',
+        description: 'There was a problem placing your order. Please try again.',
+        variant: 'destructive',
+      });
+    }
   };
 
   if (orderPlaced) {
@@ -157,6 +206,55 @@ export default function CheckoutPage() {
                     />
                   </div>
 
+
+
+                  <div className="grid grid-cols-3 w-full gap-2">
+                    <div className="space-y-2 w-full">
+                      <Label htmlFor="country">Country</Label>
+                      <Select value={"Bangladesh"}>
+                        <SelectTrigger id="country">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Bangladesh">Bangladesh</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="state">Division</Label>
+                      <Select
+                        value={formData.state}
+                        onValueChange={(value) => setFormData(prev => ({ ...prev, state: value, city: '' }))}
+                      >
+                        <SelectTrigger id="state">
+                          <SelectValue placeholder="Select Division" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {uniqueDivisions.map((division) => (
+                            <SelectItem key={division} value={division}>{division}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="city">District</Label>
+                      <Select
+                        value={formData.city}
+                        onValueChange={(value) => setFormData(prev => ({ ...prev, city: value }))}
+                        disabled={!formData.state}
+                      >
+                        <SelectTrigger id="city">
+                          <SelectValue placeholder="Select District" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {availableDistricts.map((district) => (
+                            <SelectItem key={district} value={district}>{district}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
                   <div className="space-y-2">
                     <Label htmlFor="address">Street Address</Label>
                     <Input
@@ -166,29 +264,6 @@ export default function CheckoutPage() {
                       onChange={handleInputChange}
                       required
                     />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="city">City</Label>
-                      <Input
-                        id="city"
-                        name="city"
-                        value={formData.city}
-                        onChange={handleInputChange}
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="state">State</Label>
-                      <Input
-                        id="state"
-                        name="state"
-                        value={formData.state}
-                        onChange={handleInputChange}
-                        required
-                      />
-                    </div>
                   </div>
 
                   <div className="space-y-2">
@@ -202,71 +277,7 @@ export default function CheckoutPage() {
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="country">Country</Label>
-                    <Select value={formData.country} onValueChange={(value) => setFormData({ ...formData, country: value })}>
-                      <SelectTrigger id="country">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="United States">United States</SelectItem>
-                        <SelectItem value="Canada">Canada</SelectItem>
-                        <SelectItem value="United Kingdom">United Kingdom</SelectItem>
-                        <SelectItem value="Australia">Australia</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
 
-                {/* Payment Information */}
-                <div className="border-t pt-8">
-                  <h3 className="text-lg font-semibold text-foreground mb-4">Payment Method</h3>
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="cardName">Cardholder Name</Label>
-                      <Input
-                        id="cardName"
-                        name="cardName"
-                        value={formData.cardName}
-                        onChange={handleInputChange}
-                        required
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="cardNumber">Card Number</Label>
-                      <Input
-                        id="cardNumber"
-                        name="cardNumber"
-                        value={formData.cardNumber}
-                        onChange={handleInputChange}
-                        required
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="cardExpiry">MM/YY</Label>
-                        <Input
-                          id="cardExpiry"
-                          name="cardExpiry"
-                          value={formData.cardExpiry}
-                          onChange={handleInputChange}
-                          required
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="cardCvc">CVC</Label>
-                        <Input
-                          id="cardCvc"
-                          name="cardCvc"
-                          value={formData.cardCvc}
-                          onChange={handleInputChange}
-                          required
-                        />
-                      </div>
-                    </div>
-                  </div>
                 </div>
 
                 {/* Submit Button */}
@@ -295,7 +306,7 @@ export default function CheckoutPage() {
                           {item.color} | Size: {item.size}
                         </p>
                         <p className="text-sm font-semibold text-primary mt-1">
-                          {item.quantity} × ${item.price.toFixed(2)}
+                          {item.quantity} × ৳{item.price.toFixed(2)} = ৳{(item.quantity * item.price).toFixed(2)}
                         </p>
                       </div>
                     </div>

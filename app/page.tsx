@@ -4,6 +4,7 @@ import { getCarousels } from '@/lib/carousels';
 import ProductCard from '@/components/product-card';
 import ProductSlider from '@/components/product-slider';
 import HeroSlider from '@/components/hero-slider';
+import { CategoryCard } from '@/components/category-card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
@@ -59,24 +60,18 @@ export default async function Home() {
 
         {/* Category Section */}
         <section>
-          <div className="mb-12">
-            <p className="text-sm font-semibold text-primary tracking-widest uppercase mb-2">Shop</p>
-            <h2 className="text-4xl md:text-5xl font-serif text-foreground">By Category</h2>
+          <div className="mb-12 flex flex-col items-center text-center">
+            <p className="text-sm font-semibold text-primary tracking-widest uppercase mb-3">Shop Collections</p>
+            <h2 className="text-4xl md:text-6xl font-serif text-foreground mb-4">Browse by Category</h2>
+            <p className="text-muted-foreground max-w-2xl text-lg">
+              Find your perfect look from our carefully curated collections.
+            </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {categories.filter(c => c.parentId === null).slice(0, 4).map((category) => (
-              <Link key={category.id} href={`/shop?category=${encodeURIComponent(category.name)}`}>
-                <div className="group relative h-64 md:h-72 rounded-2xl overflow-hidden cursor-pointer">
-                  <img
-                    src={category.image || "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=500&h=500&fit=crop"} // Fallback image if null
-                    alt={category.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent flex items-end p-6">
-                    <h3 className="text-white text-2xl font-semibold">{category.name}</h3>
-                  </div>
-                </div>
-              </Link>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+            {categories.filter(c => c.parentId === null).slice(0, 4).map((category, index) => (
+              <div key={category.id} className={index % 2 === 1 ? "md:translate-y-8" : ""}>
+                <CategoryCard category={category} />
+              </div>
             ))}
           </div>
         </section>

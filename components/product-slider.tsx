@@ -19,7 +19,7 @@ export default function ProductSlider({ products, title, infinite = true, autoPl
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
-  const autoPlayRef = useRef<NodeJS.Timeout>();
+  const autoPlayRef = useRef<NodeJS.Timeout | null>(null);
 
   const { addItem } = useCart();
   const { toast } = useToast();

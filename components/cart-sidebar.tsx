@@ -5,7 +5,6 @@ import { Plus, Minus, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 
 interface CartSidebarProps {
@@ -18,7 +17,7 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent side="right" className="w-full sm:max-w-md flex flex-col">
+      <SheetContent side="right" className="w-full sm:max-w-md flex flex-col h-full px-4 pb-2">
         <SheetHeader>
           <SheetTitle>Shopping Cart</SheetTitle>
         </SheetHeader>
@@ -32,7 +31,7 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
           </div>
         ) : (
           <>
-            <ScrollArea className="flex-1 pr-4 -mr-4">
+            <div className="flex-1 overflow-y-auto pr-4 -mr-4">
               <div className="space-y-4 pr-4">
                 {items.map((item) => (
                   <div key={`${item.id}-${item.size}-${item.color}`} className="border border-border rounded-lg p-4">
@@ -43,7 +42,7 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                         <p className="text-xs text-muted-foreground">
                           {item.color} | Size: {item.size}
                         </p>
-                        <p className="text-sm font-semibold text-primary mt-1">৳{item.price.toFixed(2)}</p>
+                        <p className="text-sm font-semibold text-primary mt-1">৳{Math.floor(item.price)} x {item.quantity} = {Math.floor(item.price * item.quantity)}</p>
 
                         {/* Quantity Controls */}
                         <div className="flex items-center gap-2 mt-2">
@@ -78,7 +77,7 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                   </div>
                 ))}
               </div>
-            </ScrollArea>
+            </div>
 
             <Separator className="my-4" />
 
@@ -91,9 +90,9 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                 <Link href="/checkout" onClick={onClose} className="block">
                   <Button className="w-full">Proceed to Checkout</Button>
                 </Link>
-                <Button variant="outline" className="w-full bg-transparent" onClick={() => clearCart()}>
+                {/* <Button variant="outline" className="w-full bg-transparent" onClick={() => clearCart()}>
                   Clear Cart
-                </Button>
+                </Button> */}
               </div>
             </div>
           </>

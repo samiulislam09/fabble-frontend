@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { Product } from '@/lib/products';
-import { ShoppingCart, Heart } from 'lucide-react';
+import { ShoppingCart, Heart, Eye } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/lib/cart-context';
@@ -44,7 +44,7 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
         color: 'Default',
         image: product.images[0],
       });
-      openCart();
+      // openCart(); // silent add for card
     }
   };
 
@@ -81,10 +81,20 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
               >
                 <Heart className={`h-5 w-5 ${isWishlisted ? 'fill-red-500 text-red-500' : 'text-foreground'}`} />
               </Button>
+              {/* <Link href={`/product/${product.id}`}>
+                <Button
+                  variant="secondary"
+                  size="icon"
+                  className="rounded-full shadow-md bg-white hover:bg-gray-100 h-10 w-10"
+                  title="View Details"
+                >
+                  <Eye className="h-5 w-5 text-foreground" />
+                </Button>
+              </Link> */}
             </div>
 
             {/* Add to Cart Button Centered on Hover */}
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 translate-y-10 group-hover:translate-y-0 transition-transform duration-300 w-[calc(100%-2rem)]">
+            {/* <div className="absolute bottom-4 left-1/2 -translate-x-1/2 translate-y-10 group-hover:translate-y-0 transition-transform duration-300 w-[calc(100%-2rem)]">
               <Button
                 className="w-full rounded-xl shadow-lg"
                 onClick={handleAddToCart}
@@ -92,7 +102,7 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
               >
                 {isInCart ? 'In Cart' : 'Add to Cart'}
               </Button>
-            </div>
+            </div> */}
           </div>
         </div>
 

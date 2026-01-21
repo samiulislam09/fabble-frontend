@@ -10,6 +10,8 @@ export interface CartItem {
   size: string;
   color: string;
   image: string;
+  productId?: number;
+  variantId?: number;
 }
 
 interface CartContextType {

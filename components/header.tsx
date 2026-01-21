@@ -14,6 +14,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { Category } from '@/lib/categories';
+import Image from 'next/image';
 
 interface HeaderProps {
   categories?: Category[];
@@ -23,7 +24,7 @@ export default function Header({ categories = [] }: HeaderProps) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [language, setLanguage] = useState('EN');
   const { totalItems } = useCart();
-  const { isCartOpen, openCart, closeCart, setIsCartOpen } = useUI(); // Variable declared here
+  const { isCartOpen, openCart, closeCart } = useUI(); // Variable declared here
   const isMobile = useMediaQuery('(max-width: 768px)');
 
   return (
@@ -34,9 +35,7 @@ export default function Header({ categories = [] }: HeaderProps) {
           <div className="flex items-center justify-between h-20">
             {/* Logo */}
             <Link href="/" className="flex-shrink-0 group">
-              <div className="text-xl font-serif font-bold text-foreground group-hover:text-primary transition-colors">
-                Fabble
-              </div>
+              <Image height={100} width={100} src="/fabble.png" alt="Fabble" className="h-18 w-auto" />
             </Link>
 
             {/* Search Bar - Hidden on mobile */}
@@ -86,9 +85,9 @@ export default function Header({ categories = [] }: HeaderProps) {
                 onClick={openCart}
                 className="relative hover:bg-secondary/50"
               >
-                <ShoppingCart className="h-5 w-5" />
+                <ShoppingCart className="h-10 w-10" />
                 {totalItems > 0 && (
-                  <span className="absolute top-1 right-1 bg-primary text-primary-foreground text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center text-[0.6rem]">
+                  <span className="absolute top-0 right-0 bg-primary text-primary-foreground text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center text-[0.6rem]">
                     {totalItems > 9 ? '9+' : totalItems}
                   </span>
                 )}

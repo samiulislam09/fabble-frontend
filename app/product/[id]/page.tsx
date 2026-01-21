@@ -4,13 +4,13 @@ import ProductDetailsClient from './page.client';
 import { Metadata } from 'next';
 
 interface PageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { id } = params;
+  const { id } = await params;
   const product = await getProduct(id);
 
   console.log(product, "product");

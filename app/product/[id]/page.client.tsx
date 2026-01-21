@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react"
 import { Product } from '@/lib/products';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/lib/cart-context';
+import { useUI } from '@/lib/ui-context';
 import { useToast } from '@/hooks/use-toast';
 import ProductCard from '@/components/product-card';
 import { Heart, ShoppingCart, Check } from 'lucide-react';
@@ -19,6 +20,7 @@ interface ProductDetailsClientProps {
 
 export default function ProductDetailsClient({ product, relatedProducts }: ProductDetailsClientProps) {
     const { addItem } = useCart();
+    const { openCart } = useUI();
     const { toast } = useToast();
 
     const [selectedSize, setSelectedSize] = useState<string>(''); // Sizes not in new Product type?
@@ -63,11 +65,14 @@ export default function ProductDetailsClient({ product, relatedProducts }: Produ
             size: selectedSize || 'One Size',
             color: selectedColor || 'Default',
             image: product.images[0],
+            productId: product.id,
+            variantId: 0, // Defaulting to 0 as variants are mocked
         });
         toast({
             title: 'Added to cart',
             description: `${product.name} x${quantity} has been added to your cart`,
         });
+        openCart();
     };
 
     const price = parsePrice(product.price);
@@ -240,13 +245,13 @@ export default function ProductDetailsClient({ product, relatedProducts }: Produ
 
                     {/* Product Info */}
                     <div className="border-t border-border pt-6 space-y-3">
-                        <div className="flex items-center gap-3">
+                        {/* <div className="flex items-center gap-3">
                             <Check className="h-5 w-5 text-green-600" />
                             <span className="text-sm text-foreground">Free shipping on orders over ৳5550</span>
-                        </div>
+                        </div> */}
                         <div className="flex items-center gap-3">
                             <Check className="h-5 w-5 text-green-600" />
-                            <span className="text-sm text-foreground">30-day easy returns</span>
+                            <span className="text-sm text-foreground">7-day easy returns</span>
                         </div>
                         <div className="flex items-center gap-3">
                             <Check className="h-5 w-5 text-green-600" />

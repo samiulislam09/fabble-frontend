@@ -2,7 +2,7 @@
 
 import { Product } from '@/lib/products';
 import { Category } from '@/lib/categories';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import ProductCard from '@/components/product-card';
 import { Button } from '@/components/ui/button';
@@ -35,11 +35,13 @@ export default function ShopClient({ initialProducts, initialCategories }: ShopC
     const [sortBy, setSortBy] = useState('newest');
     const [showFilters, setShowFilters] = useState(false);
 
-    // Use passed categories (filter validation could happen here if needed)
     // Flatten categories or just use top level? Usually sidebar shows structure or flat list.
     // For now, let's just use the top-level categories passed.
-    // user might want all flat for simple filter or nested. 
-    // The previous code was flat list of names. Let's keep it simple: filter by top level category name.
+
+    // Scroll to top when filters change
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, [selectedCategory, selectedSubcategory]);
 
     const categories = initialCategories.filter(c => c.parentId === null);
 
