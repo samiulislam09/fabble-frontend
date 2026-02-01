@@ -9,13 +9,16 @@ import Link from 'next/link';
 import { Loader2 } from 'lucide-react';
 
 interface OrderItem {
-    id: number;
-    productId: number;
-    variantId: number;
+    id: number | string;
+    productId: number | string;
+    variantId?: number | string | null;
     quantity: number;
     price: number;
+    unitPrice?: number;
+    size?: string;
+    color?: string;
     product?: {
-        name: string;
+        name?: string;
         images?: string[];
     };
     variant?: {
@@ -25,7 +28,7 @@ interface OrderItem {
 }
 
 interface OrderDetails {
-    id: number;
+    id: number | string;
     orderNumber: string;
     status: string;
     totalAmount: number;
@@ -39,6 +42,92 @@ interface OrderDetails {
     createdAt: string;
 }
 
+const toNumber = (value: unknown, fallback = 0) => {
+    const parsed = typeof value === 'string' ? Number.parseFloat(value) : typeof value === 'number' ? value : NaN;
+    return Number.isFinite(parsed) ? parsed : fallback;
+};
+
+const SUCCESS_TTL_MS = 10 * 60 * 1000;
+
+const normalizeOrder = (raw: any): OrderDetails | null => {
+    if (!raw) {
+        return null;
+    }
+
+    const candidate = raw.order ?? raw.data ?? raw;
+    if (!candidate) {
+        return null;
+    }
+
+    const itemsRaw = Array.isArray(candidate.items) ? candidate.items : [];
+    const items: OrderItem[] = itemsRaw.map((item: any, index: number) => {
+        const price = toNumber(item.price ?? item.unitPrice ?? item.unit_price, 0);
+        const quantity = Math.max(1, toNumber(item.quantity, 1));
+
+        const variant = item.variant ?? {
+            size: item.size,
+            color: item.color,
+        };
+
+        const product = item.product ?? {
+            name: item.productName ?? item.name,
+            images: item.images ?? item.productImages,
+        };
+
+        return {
+            id: item.id ?? item._id ?? item.productId ?? item.product_id ?? index,
+            productId: item.productId ?? item.product_id ?? item.product?.id ?? item.id ?? index,
+            variantId: item.variantId ?? item.variant_id ?? item.variant?.id ?? null,
+            quantity,
+            price,
+            unitPrice: item.unitPrice ?? item.unit_price ?? price,
+            size: item.size,
+            color: item.color,
+            product,
+            variant,
+        };
+    });
+
+    const shippingAddressRaw = candidate.shippingAddress ?? candidate.shipping_address ?? null;
+    const shippingAddress =
+        typeof shippingAddressRaw === 'string'
+            ? shippingAddressRaw
+            : [shippingAddressRaw?.line1, shippingAddressRaw?.line2].filter(Boolean).join(', ') ||
+              candidate.address ||
+              '';
+
+    const subtotal = toNumber(candidate.subtotal, NaN);
+    const shippingCharge = toNumber(candidate.shippingCharge ?? candidate.shipping_charge, 0);
+    const totalAmount = toNumber(
+        candidate.totalAmount ??
+            candidate.total ??
+            candidate.amount ??
+            (Number.isFinite(subtotal) ? subtotal + shippingCharge : NaN),
+        0
+    );
+
+    return {
+        id: candidate.id ?? candidate._id ?? candidate.orderNumber ?? '',
+        orderNumber: candidate.orderNumber ?? candidate.order_number ?? candidate.orderNo ?? '',
+        status: candidate.status ?? candidate.orderStatus ?? candidate.order_status ?? 'pending',
+        totalAmount,
+        shippingAddress,
+        shippingCity:
+            candidate.shippingCity ?? candidate.shipping_city ?? shippingAddressRaw?.city ?? candidate.city ?? '',
+        shippingCountry:
+            candidate.shippingCountry ??
+            candidate.shipping_country ??
+            shippingAddressRaw?.country ??
+            candidate.country ??
+            '',
+        shippingMethod: candidate.shippingMethod ?? candidate.shipping_method ?? 'standard',
+        paymentMethod: candidate.paymentMethod ?? candidate.payment_method ?? 'COD',
+        customerNotes: candidate.customerNotes ?? candidate.notes ?? undefined,
+        items,
+        createdAt: candidate.createdAt ?? candidate.created_at ?? candidate.created ?? '',
+    };
+};
+
 export default function OrderSuccessPage() {
     const params = useParams();
     const orderId = params.orderId as string;
@@ -48,23 +137,91 @@ export default function OrderSuccessPage() {
 
     useEffect(() => {
         async function fetchOrderDetails() {
+            let usedLocal = false;
+
+            if (typeof window !== 'undefined') {
+                const storedMeta = sessionStorage.getItem('orderSuccess');
+                const storedOrder = sessionStorage.getItem('orderSuccessData');
+                const meta = storedMeta ? JSON.parse(storedMeta) : null;
+                const matchesId = meta?.id && String(meta.id) === String(orderId);
+                const withinTtl = meta?.createdAt && Date.now() - meta.createdAt < SUCCESS_TTL_MS;
+
+                if (!matchesId || !withinTtl) {
+                    sessionStorage.removeItem('orderSuccess');
+                    sessionStorage.removeItem('orderSuccessData');
+                    setError('This order confirmation has expired.');
+                    setLoading(false);
+                    return;
+                }
+
+                if (storedOrder) {
+                    try {
+                        const parsed = JSON.parse(storedOrder);
+                        const normalized = normalizeOrder(parsed);
+                        if (normalized) {
+                            usedLocal = true;
+                            setOrder(normalized);
+                            setLoading(false);
+                        }
+                    } catch (parseError) {
+                        console.error('Failed to parse cached order:', parseError);
+                    }
+                }
+            }
+
             try {
+                if (!orderId || Number.isNaN(Number(orderId))) {
+                    if (!usedLocal) {
+                        setError('Invalid order identifier');
+                        setLoading(false);
+                    }
+                    return;
+                }
+
                 const apiUrl = process.env.NEXT_PUBLIC_APP_API_URL || 'http://localhost:5001/api';
                 const response = await fetch(`${apiUrl}/orders/${orderId}`, {
                     credentials: 'include',
                 });
 
                 if (!response.ok) {
-                    throw new Error('Failed to fetch order details');
+                    if (!usedLocal) {
+                        let message = 'Failed to fetch order details';
+                        try {
+                            const errorData = await response.json();
+                            if (errorData?.message) {
+                                message = errorData.message;
+                            }
+                        } catch {
+                            // Ignore JSON parse errors
+                        }
+                        setError(message);
+                        setLoading(false);
+                    }
+                    return;
                 }
 
                 const data = await response.json();
-                setOrder(data);
+                const normalized = normalizeOrder(data);
+                if (!normalized) {
+                    throw new Error('Order response missing details');
+                }
+                setOrder(normalized);
+                if (typeof window !== 'undefined') {
+                    sessionStorage.setItem('orderSuccessData', JSON.stringify(data));
+                    sessionStorage.setItem(
+                        'orderSuccess',
+                        JSON.stringify({ id: String(orderId), createdAt: Date.now() })
+                    );
+                }
             } catch (err) {
                 console.error('Error fetching order:', err);
-                setError('Could not load order details');
+                if (!usedLocal) {
+                    setError('Could not load order details');
+                }
             } finally {
-                setLoading(false);
+                if (!usedLocal) {
+                    setLoading(false);
+                }
             }
         }
 
@@ -131,13 +288,18 @@ export default function OrderSuccessPage() {
                                 </div>
                                 <div>
                                     <p className="text-sm text-muted-foreground">Order Date</p>
-                                    <p className="font-semibold text-foreground">
-                                        {new Date(order.createdAt).toLocaleDateString('en-US', {
-                                            year: 'numeric',
-                                            month: 'long',
-                                            day: 'numeric',
-                                        })}
-                                    </p>
+                                    {(() => {
+                                        const date = order.createdAt ? new Date(order.createdAt) : null;
+                                        const label =
+                                            date && !Number.isNaN(date.getTime())
+                                                ? date.toLocaleDateString('en-US', {
+                                                      year: 'numeric',
+                                                      month: 'long',
+                                                      day: 'numeric',
+                                                  })
+                                                : '—';
+                                        return <p className="font-semibold text-foreground">{label}</p>;
+                                    })()}
                                 </div>
                                 <div>
                                     <p className="text-sm text-muted-foreground">Status</p>
@@ -146,7 +308,7 @@ export default function OrderSuccessPage() {
                                 <div>
                                     <p className="text-sm text-muted-foreground">Payment Method</p>
                                     <p className="font-semibold text-foreground">
-                                        {order.paymentMethod.replace(/_/g, ' ')}
+                                        {order.paymentMethod ? order.paymentMethod.replace(/_/g, ' ') : '—'}
                                     </p>
                                 </div>
                             </div>
@@ -214,7 +376,7 @@ export default function OrderSuccessPage() {
                                 <div className="flex justify-between text-sm">
                                     <span className="text-muted-foreground">Shipping</span>
                                     <span className="font-medium text-foreground">
-                                        {order.shippingMethod === 'STANDARD' ? 'FREE' : '৳10.00'}
+                                        {order.shippingMethod?.toUpperCase() === 'STANDARD' ? 'FREE' : '৳10.00'}
                                     </span>
                                 </div>
                                 <div className="flex justify-between text-lg font-bold border-t border-border pt-3">

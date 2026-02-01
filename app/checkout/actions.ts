@@ -76,7 +76,9 @@ export async function createOrder(formData: CheckoutFormData, items: CartItem[])
 
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.message || 'Failed to place order');
+            const details = Array.isArray(errorData.errors) ? errorData.errors.join(', ') : '';
+            const message = errorData.message || 'Failed to place order';
+            throw new Error(details ? `${message}: ${details}` : message);
         }
 
         const data = await response.json();

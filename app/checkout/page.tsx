@@ -15,6 +15,24 @@ import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { createOrder, type CheckoutFormData } from './actions';
 
+const resolveOrderId = (data: any, fallback?: string | number) => {
+  const candidate =
+    data?.id ??
+    data?.orderId ??
+    data?.order?.id ??
+    data?.order?._id ??
+    data?._id ??
+    data?.orderNumber ??
+    data?.order?.orderNumber ??
+    fallback;
+
+  if (candidate === null || candidate === undefined || candidate === '') {
+    return undefined;
+  }
+
+  return candidate;
+};
+
 export default function CheckoutPage() {
   const { items, totalPrice, clearCart } = useCart();
   const { toast } = useToast();
@@ -62,6 +80,37 @@ export default function CheckoutPage() {
     setIsProcessing(true);
 
     try {
+      const missingFields: string[] = [];
+      if (!formData.firstName.trim()) missingFields.push('First Name');
+      if (!formData.lastName.trim()) missingFields.push('Last Name');
+      if (!formData.email.trim()) missingFields.push('Email');
+      if (!formData.phone.trim()) missingFields.push('Phone');
+      if (!formData.state) missingFields.push('Division');
+      if (!formData.city) missingFields.push('District');
+      if (!formData.address.trim()) missingFields.push('Street Address');
+      if (!formData.zipCode.trim()) missingFields.push('ZIP Code');
+
+      if (missingFields.length > 0) {
+        setIsProcessing(false);
+        toast({
+          title: 'Missing information',
+          description: `Please complete: ${missingFields.join(', ')}`,
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      const phoneDigits = formData.phone.replace(/\D/g, '');
+      if (phoneDigits.length < 10) {
+        setIsProcessing(false);
+        toast({
+          title: 'Invalid phone number',
+          description: 'Phone number must be at least 10 digits.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
       // Call server action to create order
       const result = await createOrder(formData, items.map(item => ({
         id: item.id,
@@ -82,7 +131,20 @@ export default function CheckoutPage() {
       setIsProcessing(false);
 
       // Redirect to order success page with order ID
-      router.push(`/order-success/${result.data.id || result.orderId}`);
+      const resolvedOrderId = resolveOrderId(result.data, result.orderId);
+      if (typeof window !== 'undefined') {
+        const orderPayload = result.data?.order ?? result.data?.data ?? result.data;
+        if (orderPayload) {
+          sessionStorage.setItem('orderSuccessData', JSON.stringify(orderPayload));
+        }
+        if (resolvedOrderId) {
+          sessionStorage.setItem(
+            'orderSuccess',
+            JSON.stringify({ id: String(resolvedOrderId), createdAt: Date.now() })
+          );
+        }
+      }
+      router.push(`/order-success/${resolvedOrderId ?? result.orderId}`);
     } catch (error) {
       console.error('Order placement error:', error);
       setIsProcessing(false);
@@ -144,18 +206,6 @@ export default function CheckoutPage() {
                         required
                       />
                     </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      required
-                    />
                   </div>
 
                   <div className="space-y-2">
