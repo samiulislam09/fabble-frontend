@@ -7,6 +7,7 @@ import { UIProvider } from '@/lib/ui-context'
 import Header from '@/components/header'
 import Footer from '@/components/footer'
 import FloatingCallButton from '@/components/floating-call-button'
+import { Toaster } from '@/components/ui/toaster'
 import './globals.css'
 
 const _geist = Geist({ subsets: ["latin"] });
@@ -37,6 +38,7 @@ export default async function RootLayout({
             </main>
             <Footer />
             <FloatingCallButton />
+            <Toaster />
           </CartProvider>
         </UIProvider>
         <Analytics />

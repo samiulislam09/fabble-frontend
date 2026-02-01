@@ -75,13 +75,13 @@ export default function HeroSlider({ carousels = [] }: HeroSliderProps) {
 
       <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8">
         <div className="space-y-4 animate-fade-in">
-          <p className="text-sm font-semibold text-primary tracking-widest uppercase">{slide.subtitle}</p>
-          <h1 className="text-5xl md:text-7xl font-serif text-foreground leading-tight text-balance">
+          <p className="text-sm font-semibold text-primary tracking-widest uppercase text-white">{slide.subtitle}</p>
+          <h1 className="text-5xl md:text-7xl font-serif text-foreground leading-tight text-white">
             {slide.title}
           </h1>
         </div>
 
-        <p className="text-lg md:text-xl text-foreground/70 max-w-2xl mx-auto text-balance leading-relaxed animate-fade-in">
+        <p className="text-lg md:text-xl text-foreground/70 max-w-2xl mx-auto text-balance leading-relaxed animate-fade-in text-white">
           {slide.description}
         </p>
 

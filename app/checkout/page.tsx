@@ -11,11 +11,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
+import { createOrder, type CheckoutFormData } from './actions';
 
 export default function CheckoutPage() {
   const { items, totalPrice, clearCart } = useCart();
   const { toast } = useToast();
+  const router = useRouter();
 
   // Form states
   const [formData, setFormData] = useState({
@@ -35,7 +38,6 @@ export default function CheckoutPage() {
   });
 
   const [isProcessing, setIsProcessing] = useState(false);
-  const [orderPlaced, setOrderPlaced] = useState(false);
   const [locations, setLocations] = useState<{ division: string; district: string }[]>([]);
 
   useEffect(() => {
@@ -60,77 +62,39 @@ export default function CheckoutPage() {
     setIsProcessing(true);
 
     try {
-      const userToken = localStorage.getItem('x_auth_token'); // Assuming token is stored here based on apiRoute.ts
+      // Call server action to create order
+      const result = await createOrder(formData, items.map(item => ({
+        id: item.id,
+        productId: item.productId,
+        variantId: item.variantId || null,
+        quantity: item.quantity,
+        size: item.size,
+        color: item.color,
+        unitPrice: item.price
+      })));
 
-      const payload = {
-        items: items.map(item => ({
-          productId: item.productId || parseInt(item.id), // Fallback if id is numeric, though productId should be there now
-          variantId: item.variantId || 0,
-          quantity: item.quantity
-        })),
-        shippingAddress: formData.address,
-        shippingCity: formData.city,
-        shippingCountry: "Bangladesh",
-        shippingMethod: "STANDARD", // Hardcoded for simplified flow or add selector
-        paymentMethod: "CASH_ON_DELIVERY", // Hardcoded or add selector
-        customerNotes: "Please call before delivery", // Could be a form field
-        couponCode: "" // Could be a form field
-      };
-
-      const response = await fetch(`${process.env.NEXT_PUBLIC_APP_API_URL || 'http://localhost:5001'}/api/orders/direct`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to place order');
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to place order');
       }
 
-      setIsProcessing(false);
-      setOrderPlaced(true);
+      // Clear cart and redirect to success page
       clearCart();
-      toast({
-        title: 'Order Placed Successfully',
-        description: 'Your order has been received. You will receive an email confirmation shortly.',
-      });
+      setIsProcessing(false);
+
+      // Redirect to order success page with order ID
+      router.push(`/order-success/${result.data.id || result.orderId}`);
     } catch (error) {
       console.error('Order placement error:', error);
       setIsProcessing(false);
       toast({
         title: 'Order Failed',
-        description: 'There was a problem placing your order. Please try again.',
+        description: error instanceof Error ? error.message : 'There was a problem placing your order. Please try again.',
         variant: 'destructive',
       });
     }
   };
 
-  if (orderPlaced) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center px-4">
-        <Card className="max-w-md">
-          <CardHeader className="text-center">
-            <div className="text-6xl mb-4">✓</div>
-            <CardTitle className="text-3xl">Order Placed!</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <p className="text-muted-foreground">Thank you for your purchase. Your order has been confirmed and will be shipped soon.</p>
-            <div className="bg-muted rounded-lg p-4 text-left space-y-2">
-              <p className="text-sm text-muted-foreground">Order Number: #OS{Math.random().toString(36).substring(7).toUpperCase()}</p>
-              <p className="text-sm text-muted-foreground">Total: ${totalPrice.toFixed(2)}</p>
-            </div>
-            <Link href="/" className="block">
-              <Button className="w-full">Continue Shopping</Button>
-            </Link>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  if (items.length === 0 && !orderPlaced) {
+  if (items.length === 0) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center px-4">
         <div className="text-center max-w-md">
@@ -326,16 +290,16 @@ export default function CheckoutPage() {
                     {totalPrice > 50 ? 'FREE' : '৳10.00'}
                   </span>
                 </div>
-                <div className="flex justify-between text-sm">
+                {/* <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Tax</span>
                   <span className="font-medium text-foreground">
                     ৳{((totalPrice + (totalPrice > 50 ? 0 : 10)) * 0.1).toFixed(2)}
                   </span>
-                </div>
+                </div> */}
                 <div className="flex justify-between text-lg font-bold border-t border-border pt-3">
                   <span className="text-foreground">Total</span>
                   <span className="text-primary">
-                    ৳{(totalPrice + (totalPrice > 50 ? 0 : 10) + (totalPrice + (totalPrice > 50 ? 0 : 10)) * 0.1).toFixed(2)}
+                    ৳{(totalPrice + (totalPrice > 50 ? 0 : 10)).toFixed(2)}
                   </span>
                 </div>
               </div>

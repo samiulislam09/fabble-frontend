@@ -7,7 +7,9 @@ interface CategoryNavProps {
   categories?: Category[];
 }
 
+
 export default function CategoryNav({ categories = [] }: CategoryNavProps) {
+  console.log('Categories:', categories);
   // Filter top-level categories (parentId is null)
   const topLevelCategories = categories.filter(c => c.parentId === null);
 

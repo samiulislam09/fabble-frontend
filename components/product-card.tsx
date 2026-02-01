@@ -9,14 +9,31 @@ import { useCart } from '@/lib/cart-context';
 import { useUI } from '@/lib/ui-context';
 import { Badge } from '@/components/ui/badge';
 
+// Helper to parse images - handles comma-separated string or array
+const parseImages = (images: string | string[]): string[] => {
+  if (Array.isArray(images)) {
+    if (images.length === 1 && images[0].includes(',')) {
+      return images[0].split(',').map(img => img.trim()).filter(Boolean);
+    }
+    return images.flatMap(img => 
+      img.includes(',') ? img.split(',').map(i => i.trim()).filter(Boolean) : [img]
+    );
+  }
+  if (typeof images === 'string') {
+    return images.split(',').map(img => img.trim()).filter(Boolean);
+  }
+  return [];
+};
+
 interface ProductCardProps {
   product: Product;
   onAddToCart?: () => void; // Optional, can handle internally
 }
 
 export default function ProductCard({ product, onAddToCart }: ProductCardProps) {
+  const productImages = parseImages(product.images);
   const [isWishlisted, setIsWishlisted] = useState(false);
-  const [mainImage, setMainImage] = useState(product.images[0]);
+  const [mainImage, setMainImage] = useState(productImages[0] || '');
   const { items, addItem } = useCart();
   const { openCart } = useUI();
 
@@ -42,7 +59,7 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
         quantity: 1,
         size: 'M',
         color: 'Default',
-        image: product.images[0],
+        image: productImages[0] || '',
       });
       // openCart(); // silent add for card
     }
@@ -70,7 +87,7 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
           {/* Quick Actions Overlay */}
           <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
             <div className="absolute top-4 right-4 flex flex-col gap-2 translate-x-10 group-hover:translate-x-0 transition-transform duration-300 delay-75">
-              <Button
+              {/* <Button
                 variant="secondary"
                 size="icon"
                 className="rounded-full shadow-md bg-white hover:bg-gray-100 h-10 w-10"
@@ -80,8 +97,7 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
                 }}
               >
                 <Heart className={`h-5 w-5 ${isWishlisted ? 'fill-red-500 text-red-500' : 'text-foreground'}`} />
-              </Button>
-              {/* <Link href={`/product/${product.id}`}>
+              </Button> */}
                 <Button
                   variant="secondary"
                   size="icon"
@@ -90,7 +106,6 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
                 >
                   <Eye className="h-5 w-5 text-foreground" />
                 </Button>
-              </Link> */}
             </div>
 
             {/* Add to Cart Button Centered on Hover */}

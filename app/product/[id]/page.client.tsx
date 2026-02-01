@@ -13,6 +13,26 @@ import { colorMap } from '@/lib/colors';
 
 const parsePrice = (price: string | number) => typeof price === 'string' ? parseFloat(price) : price;
 
+// Helper to parse images - handles comma-separated string or array
+const parseImages = (images: string | string[] | undefined | null): string[] => {
+    if (!images) return [];
+    if (Array.isArray(images)) {
+        // If it's an array, check if first element contains commas (comma-separated string in array)
+        if (images.length === 1 && images[0] && images[0].includes(',')) {
+            return images[0].split(',').map(img => img.trim()).filter(Boolean);
+        }
+        // Check each element for comma-separated values and flatten
+        return images.flatMap(img => 
+            img && img.includes(',') ? img.split(',').map(i => i.trim()).filter(Boolean) : [img]
+        ).filter(Boolean);
+    }
+    // If it's a string, split by comma
+    if (typeof images === 'string') {
+        return images.split(',').map(img => img.trim()).filter(Boolean);
+    }
+    return [];
+};
+
 interface ProductDetailsClientProps {
     product: Product;
     relatedProducts: Product[];
@@ -23,10 +43,14 @@ export default function ProductDetailsClient({ product, relatedProducts }: Produ
     const { openCart } = useUI();
     const { toast } = useToast();
 
+    // Parse images to handle comma-separated strings
+    const productImages = parseImages(product.images);
+    
+
     const [selectedSize, setSelectedSize] = useState<string>(''); // Sizes not in new Product type?
     const [selectedColor, setSelectedColor] = useState<string>(''); // Colors not in new Product type?
     const [quantity, setQuantity] = useState(1);
-    const [mainImage, setMainImage] = useState(product.images[0] || '');
+    const [mainImage, setMainImage] = useState(productImages[0] || '');
     const [isZoomed, setIsZoomed] = useState(false);
     const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 });
     const [isWishlisted, setIsWishlisted] = useState(false);
@@ -64,7 +88,7 @@ export default function ProductDetailsClient({ product, relatedProducts }: Produ
             quantity,
             size: selectedSize || 'One Size',
             color: selectedColor || 'Default',
-            image: product.images[0],
+            image: productImages[0] || '',
             productId: product.id,
             variantId: 0, // Defaulting to 0 as variants are mocked
         });
@@ -113,18 +137,20 @@ export default function ProductDetailsClient({ product, relatedProducts }: Produ
                     </div>
 
                     {/* Thumbnail Images */}
-                    <div className="flex gap-3">
-                        {product.images.map((img, idx) => (
-                            <button
-                                key={idx}
-                                onClick={() => setMainImage(img)}
-                                className={`h-20 w-20 rounded-lg overflow-hidden border-2 transition ${mainImage === img ? 'border-primary' : 'border-border hover:border-primary/50'
-                                    }`}
-                            >
-                                <img src={img || "/placeholder.svg"} alt={`${product.name} ${idx + 1}`} className="w-full h-full object-cover" />
-                            </button>
-                        ))}
-                    </div>
+                    {productImages.length > 0 && (
+                        <div className="flex gap-3 overflow-x-auto pb-2">
+                            {productImages.map((img, idx) => (
+                                <button
+                                    key={idx}
+                                    onClick={() => setMainImage(img)}
+                                    className={`h-20 w-20 flex-shrink-0 rounded-lg overflow-hidden border-2 transition ${mainImage === img ? 'border-primary' : 'border-border hover:border-primary/50'
+                                        }`}
+                                >
+                                    <img src={img || "/placeholder.svg"} alt={`${product.name} ${idx + 1}`} className="w-full h-full object-cover" />
+                                </button>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
                 {/* Product Info */}

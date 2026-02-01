@@ -14,6 +14,22 @@ import { ChevronDown } from 'lucide-react';
 // Helper to safely parse float
 const parsePrice = (price: string | number) => typeof price === 'string' ? parseFloat(price) : price;
 
+// Helper to parse images - handles comma-separated string or array
+const parseImages = (images: string | string[]): string[] => {
+    if (Array.isArray(images)) {
+        if (images.length === 1 && images[0].includes(',')) {
+            return images[0].split(',').map(img => img.trim()).filter(Boolean);
+        }
+        return images.flatMap(img => 
+            img.includes(',') ? img.split(',').map(i => i.trim()).filter(Boolean) : [img]
+        );
+    }
+    if (typeof images === 'string') {
+        return images.split(',').map(img => img.trim()).filter(Boolean);
+    }
+    return [];
+};
+
 interface ShopClientProps {
     initialProducts: Product[];
     initialCategories: Category[];
@@ -79,6 +95,7 @@ export default function ShopClient({ initialProducts, initialCategories }: ShopC
 
     const handleAddToCart = (product: Product) => {
         // Need to adapt Product to CartItem type
+        const productImages = parseImages(product.images);
         addItem({
             id: product.id.toString(),
             name: product.name,
@@ -86,7 +103,7 @@ export default function ShopClient({ initialProducts, initialCategories }: ShopC
             quantity: 1,
             size: 'M', // Default
             color: 'Default',
-            image: product.images[0],
+            image: productImages[0] || '',
         });
         toast({
             title: 'Added to cart',

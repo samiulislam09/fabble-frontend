@@ -4,6 +4,7 @@ import { getCarousels } from '@/lib/carousels';
 import ProductCard from '@/components/product-card';
 import ProductSlider from '@/components/product-slider';
 import HeroSlider from '@/components/hero-slider';
+import NewsletterSignup from '@/components/newsletter-signup';
 import { CategoryCard } from '@/components/category-card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -123,16 +124,7 @@ export default async function Home() {
               Subscribe for exclusive offers, new collection launches, and style inspiration delivered to your inbox.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="flex-1 max-w-xs px-5 py-3 rounded-xl border border-border bg-white text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-              <Button size="lg" className="whitespace-nowrap">
-                Subscribe
-              </Button>
-            </div>
+            <NewsletterSignup />
           </div>
         </section>
       </div>

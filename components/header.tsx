@@ -11,10 +11,11 @@ import CartSidebar from './cart-sidebar';
 import CategoryNav from './category-nav';
 import SearchBar from './search-bar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Category } from '@/lib/categories';
 import Image from 'next/image';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 interface HeaderProps {
   categories?: Category[];
@@ -26,6 +27,13 @@ export default function Header({ categories = [] }: HeaderProps) {
   const { totalItems } = useCart();
   const { isCartOpen, openCart, closeCart } = useUI(); // Variable declared here
   const isMobile = useMediaQuery('(max-width: 768px)');
+  const topLevelCategories = categories.filter((c) => c.parentId === null);
+  const topLevelCategoriesWithChildren = topLevelCategories.filter(
+    (c) => c.children && c.children.length > 0,
+  );
+  const topLevelCategoriesWithoutChildren = topLevelCategories.filter(
+    (c) => !c.children || c.children.length === 0,
+  );
 
   return (
     <>
@@ -52,6 +60,7 @@ export default function Header({ categories = [] }: HeaderProps) {
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="w-full">
+                    <DialogTitle className="sr-only">Search</DialogTitle>
                     <SearchBar isMobile onSearch={() => setIsSearchOpen(false)} />
                   </DialogContent>
                 </Dialog>
@@ -102,26 +111,70 @@ export default function Header({ categories = [] }: HeaderProps) {
                     </Button>
                   </SheetTrigger>
                   <SheetContent side="right" className="w-64">
-                    <nav className="space-y-1 mt-8">
-                      <Link href="/" className="block px-4 py-3 text-sm font-medium text-foreground hover:bg-secondary/30 rounded-lg transition">
-                        Home
-                      </Link>
-                      <Link href="/shop" className="block px-4 py-3 text-sm font-medium text-foreground hover:bg-secondary/30 rounded-lg transition">
-                        Shop All
-                      </Link>
-                      <Link href="/shop?category=Men" className="block px-4 py-3 text-sm font-medium text-foreground hover:bg-secondary/30 rounded-lg transition">
-                        Men
-                      </Link>
-                      <Link href="/shop?category=Women" className="block px-4 py-3 text-sm font-medium text-foreground hover:bg-secondary/30 rounded-lg transition">
-                        Women
-                      </Link>
-                      <Link href="/shop?category=Kids" className="block px-4 py-3 text-sm font-medium text-foreground hover:bg-secondary/30 rounded-lg transition">
-                        Kids
-                      </Link>
-                      <Link href="/about" className="block px-4 py-3 text-sm font-medium text-foreground hover:bg-secondary/30 rounded-lg transition">
-                        About
-                      </Link>
-                    </nav>
+                    <SheetHeader className="sr-only">
+                      <SheetTitle>Navigation menu</SheetTitle>
+                    </SheetHeader>
+                    <div className="space-y-6 mt-8">
+                      <nav className="space-y-1">
+                        <Link href="/" className="block px-4 py-3 text-sm font-medium text-foreground hover:bg-secondary/30 rounded-lg transition">
+                          Home
+                        </Link>
+                        <Link href="/shop" className="block px-4 py-3 text-sm font-medium text-foreground hover:bg-secondary/30 rounded-lg transition">
+                          Shop All
+                        </Link>
+                        <Link href="/about" className="block px-4 py-3 text-sm font-medium text-foreground hover:bg-secondary/30 rounded-lg transition">
+                          About
+                        </Link>
+                      </nav>
+
+                      {topLevelCategories.length > 0 && (
+                        <div className="border-t border-border pt-4">
+                          <p className="text-xs font-semibold text-muted-foreground uppercase px-1 mb-3">Shop by Category</p>
+                          <div className="space-y-2">
+                            {topLevelCategoriesWithoutChildren.map((category) => (
+                              <Link
+                                key={category.id}
+                                href={`/shop?category=${encodeURIComponent(category.name)}`}
+                                className="block px-4 py-2 text-sm font-medium text-foreground hover:bg-secondary/30 rounded-lg transition"
+                              >
+                                {category.name}
+                              </Link>
+                            ))}
+                          </div>
+
+                          {topLevelCategoriesWithChildren.length > 0 && (
+                            <Accordion type="single" collapsible className="mt-3 rounded-lg border border-border">
+                              {topLevelCategoriesWithChildren.map((category) => (
+                                <AccordionItem key={category.id} value={`category-${category.id}`} className="border-border">
+                                  <AccordionTrigger className="px-4 py-3 text-sm font-medium text-foreground">
+                                    {category.name}
+                                  </AccordionTrigger>
+                                  <AccordionContent className="px-4 pb-4">
+                                    <div className="space-y-2">
+                                      <Link
+                                        href={`/shop?category=${encodeURIComponent(category.name)}`}
+                                        className="block text-sm font-medium text-foreground hover:text-primary transition"
+                                      >
+                                        View all {category.name}
+                                      </Link>
+                                      {category.children.map((sub) => (
+                                        <Link
+                                          key={sub.id}
+                                          href={`/shop?category=${encodeURIComponent(category.name)}&subcategory=${encodeURIComponent(sub.name)}`}
+                                          className="block text-sm text-muted-foreground hover:text-primary transition"
+                                        >
+                                          {sub.name}
+                                        </Link>
+                                      ))}
+                                    </div>
+                                  </AccordionContent>
+                                </AccordionItem>
+                              ))}
+                            </Accordion>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </SheetContent>
                 </Sheet>
               )}

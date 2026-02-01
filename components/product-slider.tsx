@@ -7,6 +7,22 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useCart } from '@/lib/cart-context';
 import { useToast } from '@/hooks/use-toast';
 
+// Helper to parse images - handles comma-separated string or array
+const parseImages = (images: string | string[]): string[] => {
+  if (Array.isArray(images)) {
+    if (images.length === 1 && images[0].includes(',')) {
+      return images[0].split(',').map(img => img.trim()).filter(Boolean);
+    }
+    return images.flatMap(img => 
+      img.includes(',') ? img.split(',').map(i => i.trim()).filter(Boolean) : [img]
+    );
+  }
+  if (typeof images === 'string') {
+    return images.split(',').map(img => img.trim()).filter(Boolean);
+  }
+  return [];
+};
+
 interface ProductSliderProps {
   products: Product[];
   title?: string;
@@ -84,6 +100,7 @@ export default function ProductSlider({ products, title, infinite = true, autoPl
   const handleAddToCart = (product: Product) => {
     // Helper to safely parse float
     const parsePrice = (price: string | number) => typeof price === 'string' ? parseFloat(price) : price;
+    const productImages = parseImages(product.images);
 
     addItem({
       id: product.id.toString(),
@@ -92,7 +109,7 @@ export default function ProductSlider({ products, title, infinite = true, autoPl
       quantity: 1,
       size: 'M', // Default as not in API
       color: 'Default', // Default as not in API
-      image: product.images[0],
+      image: productImages[0] || '',
     });
     toast({
       title: 'Added to cart',
