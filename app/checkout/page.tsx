@@ -2,7 +2,7 @@
 
 import React from "react"
 
-import { useCart } from '@/lib/cart-context';
+import { useCart, type CartItem } from '@/lib/cart-context';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -14,6 +14,8 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { createOrder, type CheckoutFormData } from './actions';
+import { getAccessToken } from '@/lib/auth';
+import { useAuth } from '@/lib/auth-context';
 
 const resolveOrderId = (data: any, fallback?: string | number) => {
   const candidate =
@@ -37,6 +39,7 @@ export default function CheckoutPage() {
   const { items, totalPrice, clearCart } = useCart();
   const { toast } = useToast();
   const router = useRouter();
+  const { user } = useAuth();
 
   // Form states
   const [formData, setFormData] = useState({
@@ -45,10 +48,7 @@ export default function CheckoutPage() {
     email: '',
     phone: '',
     address: '',
-    city: '',
-    state: '',
-    zipCode: '',
-    country: 'United States',
+    shippingZone: 'INSIDE_DHAKA',
     cardName: '',
     cardNumber: '',
     cardExpiry: '',
@@ -56,19 +56,33 @@ export default function CheckoutPage() {
   });
 
   const [isProcessing, setIsProcessing] = useState(false);
-  const [locations, setLocations] = useState<{ division: string; district: string }[]>([]);
+
+  const formatVariantLabel = (item: CartItem) => {
+    const labels: string[] = [];
+    if (item.variantValue) {
+      labels.push(`${item.variantType || 'Variant'}: ${item.variantValue}`);
+    } else {
+      if (item.color && item.color !== 'Default') {
+        labels.push(`Color: ${item.color}`);
+      }
+      if (item.size && item.size !== 'Default' && item.size !== 'One Size') {
+        labels.push(`Size: ${item.size}`);
+      }
+    }
+    return labels.length ? labels.join(' • ') : 'Standard';
+  };
 
   useEffect(() => {
-    fetch('/cities.json')
-      .then(res => res.json())
-      .then(data => setLocations(data))
-      .catch(err => console.error('Failed to load cities:', err));
-  }, []);
-
-  const uniqueDivisions = Array.from(new Set(locations.map(l => l.division)));
-  const availableDistricts = locations
-    .filter(l => l.division === formData.state)
-    .map(l => l.district);
+    if (!user) return;
+    const nameParts = user.name ? user.name.split(' ') : [];
+    setFormData((prev) => ({
+      ...prev,
+      firstName: prev.firstName || nameParts[0] || '',
+      lastName: prev.lastName || nameParts.slice(1).join(' ') || '',
+      email: prev.email || user.email || '',
+      phone: prev.phone || user.mobile || ''
+    }));
+  }, [user]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -85,10 +99,8 @@ export default function CheckoutPage() {
       if (!formData.lastName.trim()) missingFields.push('Last Name');
       if (!formData.email.trim()) missingFields.push('Email');
       if (!formData.phone.trim()) missingFields.push('Phone');
-      if (!formData.state) missingFields.push('Division');
-      if (!formData.city) missingFields.push('District');
+      if (!formData.shippingZone) missingFields.push('Delivery Zone');
       if (!formData.address.trim()) missingFields.push('Street Address');
-      if (!formData.zipCode.trim()) missingFields.push('ZIP Code');
 
       if (missingFields.length > 0) {
         setIsProcessing(false);
@@ -119,8 +131,10 @@ export default function CheckoutPage() {
         quantity: item.quantity,
         size: item.size,
         color: item.color,
+        variantType: item.variantType,
+        variantValue: item.variantValue,
         unitPrice: item.price
-      })));
+      })), getAccessToken());
 
       if (!result.success) {
         throw new Error(result.error || 'Failed to place order');
@@ -155,6 +169,9 @@ export default function CheckoutPage() {
       });
     }
   };
+
+  const shippingCharge = formData.shippingZone === 'OUTSIDE_DHAKA' ? 110 : 80;
+  const orderTotal = totalPrice + shippingCharge;
 
   if (items.length === 0) {
     return (
@@ -209,6 +226,18 @@ export default function CheckoutPage() {
                   </div>
 
                   <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
                     <Label htmlFor="phone">Phone</Label>
                     <Input
                       id="phone"
@@ -222,51 +251,20 @@ export default function CheckoutPage() {
 
 
 
-                  <div className="grid grid-cols-3 w-full gap-2">
-                    <div className="space-y-2 w-full">
-                      <Label htmlFor="country">Country</Label>
-                      <Select value={"Bangladesh"}>
-                        <SelectTrigger id="country">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Bangladesh">Bangladesh</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="state">Division</Label>
-                      <Select
-                        value={formData.state}
-                        onValueChange={(value) => setFormData(prev => ({ ...prev, state: value, city: '' }))}
-                      >
-                        <SelectTrigger id="state">
-                          <SelectValue placeholder="Select Division" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {uniqueDivisions.map((division) => (
-                            <SelectItem key={division} value={division}>{division}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="city">District</Label>
-                      <Select
-                        value={formData.city}
-                        onValueChange={(value) => setFormData(prev => ({ ...prev, city: value }))}
-                        disabled={!formData.state}
-                      >
-                        <SelectTrigger id="city">
-                          <SelectValue placeholder="Select District" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {availableDistricts.map((district) => (
-                            <SelectItem key={district} value={district}>{district}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="shippingZone">Delivery Zone</Label>
+                    <Select
+                      value={formData.shippingZone}
+                      onValueChange={(value) => setFormData(prev => ({ ...prev, shippingZone: value }))}
+                    >
+                      <SelectTrigger id="shippingZone">
+                        <SelectValue placeholder="Select Delivery Zone" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="INSIDE_DHAKA">Inside Dhaka (৳80)</SelectItem>
+                        <SelectItem value="OUTSIDE_DHAKA">Outside Dhaka (৳110)</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <div className="space-y-2">
@@ -280,18 +278,7 @@ export default function CheckoutPage() {
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="zipCode">ZIP Code</Label>
-                    <Input
-                      id="zipCode"
-                      name="zipCode"
-                      value={formData.zipCode}
-                      onChange={handleInputChange}
-                      required
-                    />
-                  </div>
-
-
+                  
                 </div>
 
                 {/* Submit Button */}
@@ -317,7 +304,7 @@ export default function CheckoutPage() {
                       <div className="flex-1">
                         <p className="font-medium text-foreground text-sm">{item.name}</p>
                         <p className="text-xs text-muted-foreground">
-                          {item.color} | Size: {item.size}
+                          {formatVariantLabel(item)}
                         </p>
                         <p className="text-sm font-semibold text-primary mt-1">
                           {item.quantity} × ৳{item.price.toFixed(2)} = ৳{(item.quantity * item.price).toFixed(2)}
@@ -336,9 +323,7 @@ export default function CheckoutPage() {
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Shipping</span>
-                  <span className="font-medium text-foreground">
-                    {totalPrice > 50 ? 'FREE' : '৳10.00'}
-                  </span>
+                  <span className="font-medium text-foreground">৳{shippingCharge.toFixed(2)}</span>
                 </div>
                 {/* <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Tax</span>
@@ -349,7 +334,7 @@ export default function CheckoutPage() {
                 <div className="flex justify-between text-lg font-bold border-t border-border pt-3">
                   <span className="text-foreground">Total</span>
                   <span className="text-primary">
-                    ৳{(totalPrice + (totalPrice > 50 ? 0 : 10)).toFixed(2)}
+                    ৳{orderTotal.toFixed(2)}
                   </span>
                 </div>
               </div>

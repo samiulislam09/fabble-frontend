@@ -31,6 +31,14 @@ const handleApiError = async (err: AxiosError<ErrorResponse>): Promise<ErrorResp
     return { ...err?.response?.data };
 };
 
+const getAuthHeader = () => {
+    if (typeof window === 'undefined') {
+        return {};
+    }
+    const token = localStorage?.getItem('fabble_access_token');
+    return token ? { Authorization: `Bearer ${token}` } : {};
+};
+
 /**
  * Axios request wrapper
  * @method POST
@@ -44,7 +52,8 @@ export const postRequest = async <T = any>(
 ): Promise<ApiResponse<T>> => {
     const headers = {
         'Content-Type': 'application/json',
-        credentials: 'include'
+        credentials: 'include',
+        ...getAuthHeader()
     };
 
     const data = await axios
@@ -67,7 +76,8 @@ export const putRequest = async <T = any>(
 ): Promise<ApiResponse<T>> => {
     const headers = {
         'Content-Type': 'application/json',
-        credentials: 'include'
+        credentials: 'include',
+        ...getAuthHeader()
     };
 
     const data = await axios
@@ -85,7 +95,8 @@ export const putRequest = async <T = any>(
  */
 export const getRequest = async <T = any>(url: string): Promise<ApiResponse<T>> => {
     const headers = {
-        credentials: 'include'
+        credentials: 'include',
+        ...getAuthHeader()
     };
 
     const data = await axios
@@ -103,7 +114,8 @@ export const getRequest = async <T = any>(url: string): Promise<ApiResponse<T>> 
  */
 export const deleteRequest = async <T = any>(url: string): Promise<ApiResponse<T>> => {
     const headers = {
-        credentials: 'include'
+        credentials: 'include',
+        ...getAuthHeader()
     };
 
     const data = await axios

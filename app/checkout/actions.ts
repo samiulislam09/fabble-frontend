@@ -7,10 +7,7 @@ export interface CheckoutFormData {
     email: string;
     phone: string;
     address: string;
-    city: string;
-    state: string;
-    zipCode: string;
-    country: string;
+    shippingZone: 'INSIDE_DHAKA' | 'OUTSIDE_DHAKA' | string;
 }
 
 export interface CartItem {
@@ -20,15 +17,57 @@ export interface CartItem {
     quantity: number;
     size: string;
     color: string;
+    variantType?: string;
+    variantValue?: string;
     unitPrice: number;
 }
 
-export async function createOrder(formData: CheckoutFormData, items: CartItem[]) {
+export async function createOrder(formData: CheckoutFormData, items: CartItem[], accessToken?: string | null) {
     console.log('Creating order with items:', items);
     try {
-        // Calculate subtotal and total
+        // Use the API URL from environment or fallback to localhost for development
+        const apiUrl = process.env.APP_API_URL || 'http://localhost:5001/api';
+        const shippingZone = formData.shippingZone === 'OUTSIDE_DHAKA' ? 'OUTSIDE_DHAKA' : 'INSIDE_DHAKA';
+        const shippingCity = shippingZone === 'OUTSIDE_DHAKA' ? 'Outside Dhaka' : 'Dhaka';
+        const shippingCharge = shippingZone === 'OUTSIDE_DHAKA' ? 110 : 80;
+        const shippingMethod = shippingZone;
+
+        if (accessToken) {
+            const response = await fetch(`${apiUrl}/orders/place`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${accessToken}`
+                },
+                body: JSON.stringify({
+                    shippingAddress: formData.address,
+                    shippingCity: shippingCity,
+                    shippingCountry: 'Bangladesh',
+                    shippingMethod: shippingMethod,
+                    paymentMethod: 'CASH_ON_DELIVERY',
+                    customerNotes: '',
+                    customerName: `${formData.firstName} ${formData.lastName}`.trim(),
+                    customerPhone: formData.phone
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                const details = Array.isArray(errorData.errors) ? errorData.errors.join(', ') : '';
+                const message = errorData.message || 'Failed to place order';
+                throw new Error(details ? `${message}: ${details}` : message);
+            }
+
+            const data = await response.json();
+            return {
+                success: true,
+                data,
+                orderId: data?.data?.order?.id || data?.order?.id || data?.id
+            };
+        }
+
+        // Calculate subtotal and total for direct order (guest)
         const subtotal = items.reduce((sum, item) => sum + (item.unitPrice * item.quantity), 0);
-        const shippingCharge = subtotal > 50 ? 0 : 60;
         const total = subtotal + shippingCharge;
 
         const payload = {
@@ -39,19 +78,28 @@ export async function createOrder(formData: CheckoutFormData, items: CartItem[])
             },
             shippingAddress: {
                 line1: formData.address,
-                city: formData.city,
-                postalCode: formData.zipCode,
+                city: shippingCity,
                 country: "BD"
             },
-            items: items.map(item => ({
-                productId: item.productId || parseInt(item.id),
-                variantId: item.variantId || null,
-                size: item.size,
-                color: item.color,
-                quantity: item.quantity,
-                unitPrice: item.unitPrice
-            })),
-            shippingMethod: "standard",
+            items: items.map(item => {
+                const normalizedVariantType = item.variantType?.toLowerCase() || '';
+                const size = normalizedVariantType.includes('size')
+                    ? (item.variantValue || item.size)
+                    : item.size;
+                const color = normalizedVariantType.includes('color')
+                    ? (item.variantValue || item.color)
+                    : item.color;
+
+                return {
+                    productId: item.productId || parseInt(item.id, 10),
+                    variantId: item.variantId || null,
+                    size: size || null,
+                    color: color || null,
+                    quantity: item.quantity,
+                    unitPrice: item.unitPrice
+                };
+            }),
+            shippingMethod: shippingMethod,
             shippingCharge: shippingCharge,
             paymentMethod: "COD",
             subtotal: subtotal,
@@ -62,15 +110,12 @@ export async function createOrder(formData: CheckoutFormData, items: CartItem[])
             paymentStatus: "pending"
         };
 
-        // Use the API URL from environment or fallback to localhost for development
-        const apiUrl = process.env.NEXT_PUBLIC_APP_API_URL || 'http://localhost:5001/api';
-
         const response = await fetch(`${apiUrl}/orders/direct`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            credentials: 'include', // Include cookies for authentication
+            credentials: 'include',
             body: JSON.stringify(payload)
         });
 

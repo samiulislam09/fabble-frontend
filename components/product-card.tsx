@@ -8,6 +8,9 @@ import { Button } from '@/components/ui/button';
 import { useCart } from '@/lib/cart-context';
 import { useUI } from '@/lib/ui-context';
 import { Badge } from '@/components/ui/badge';
+import { useAuth } from '@/lib/auth-context';
+import { authFetch } from '@/lib/auth-fetch';
+import { useToast } from '@/hooks/use-toast';
 
 // Helper to parse images - handles comma-separated string or array
 const parseImages = (images: string | string[]): string[] => {
@@ -36,6 +39,8 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
   const [mainImage, setMainImage] = useState(productImages[0] || '');
   const { items, addItem } = useCart();
   const { openCart } = useUI();
+  const { user } = useAuth();
+  const { toast } = useToast();
 
   // Check if product is in cart (by any size/color combination)
   const isInCart = items.some((item) => item.id === product.id.toString());
@@ -60,8 +65,39 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
         size: 'M',
         color: 'Default',
         image: productImages[0] || '',
+        productId: product.id,
       });
       // openCart(); // silent add for card
+    }
+  };
+
+  const handleWishlist = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!user) {
+      toast({
+        title: 'Sign in required',
+        description: 'Please sign in to save items to your wishlist.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    const response = await authFetch('/wishlist/add', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ productId: product.id })
+    });
+
+    if (response.ok) {
+      setIsWishlisted(true);
+      toast({ title: 'Added to wishlist' });
+    } else {
+      const data = await response.json().catch(() => ({}));
+      toast({
+        title: 'Wishlist',
+        description: data?.message || 'Could not update wishlist.',
+        variant: 'destructive'
+      });
     }
   };
 
@@ -87,17 +123,14 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
           {/* Quick Actions Overlay */}
           <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
             <div className="absolute top-4 right-4 flex flex-col gap-2 translate-x-10 group-hover:translate-x-0 transition-transform duration-300 delay-75">
-              {/* <Button
+              <Button
                 variant="secondary"
                 size="icon"
                 className="rounded-full shadow-md bg-white hover:bg-gray-100 h-10 w-10"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setIsWishlisted(!isWishlisted);
-                }}
+                onClick={handleWishlist}
               >
                 <Heart className={`h-5 w-5 ${isWishlisted ? 'fill-red-500 text-red-500' : 'text-foreground'}`} />
-              </Button> */}
+              </Button>
                 <Button
                   variant="secondary"
                   size="icon"

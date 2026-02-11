@@ -28,6 +28,24 @@ export interface ProductBrand {
   updatedAt: string;
 }
 
+export interface ProductVariantType {
+  id: number;
+  name: string;
+}
+
+export interface ProductVariant {
+  id: number;
+  value: string;
+  sku?: string | null;
+  price?: string | number | null;
+  comparePrice?: string | number | null;
+  stockQuantity?: number | null;
+  image?: string | null;
+  isActive?: boolean;
+  isDefault?: boolean;
+  variantType?: ProductVariantType | null;
+}
+
 export interface Product {
   id: number;
   name: string;
@@ -57,7 +75,7 @@ export interface Product {
   updatedAt: string;
   category: ProductCategory;
   brand: ProductBrand;
-  variants: any[];
+  variants: ProductVariant[];
   _count: {
     variants: number;
   };
@@ -124,5 +142,3 @@ export const getProduct = async (id: string): Promise<Product | undefined> => {
     return undefined;
   }
 };
-
-

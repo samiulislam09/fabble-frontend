@@ -110,6 +110,7 @@ export default function ProductSlider({ products, title, infinite = true, autoPl
       size: 'M', // Default as not in API
       color: 'Default', // Default as not in API
       image: productImages[0] || '',
+      productId: product.id,
     });
     toast({
       title: 'Added to cart',

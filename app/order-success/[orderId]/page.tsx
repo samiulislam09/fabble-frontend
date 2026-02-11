@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import Link from 'next/link';
 import { Loader2 } from 'lucide-react';
+import { authFetch } from '@/lib/auth-fetch';
+import { getAccessToken } from '@/lib/auth';
 
 interface OrderItem {
     id: number | string;
@@ -17,6 +19,8 @@ interface OrderItem {
     unitPrice?: number;
     size?: string;
     color?: string;
+    variantType?: string;
+    variantValue?: string;
     product?: {
         name?: string;
         images?: string[];
@@ -36,6 +40,7 @@ interface OrderDetails {
     shippingCity: string;
     shippingCountry: string;
     shippingMethod: string;
+    shippingCost: number;
     paymentMethod: string;
     customerNotes?: string;
     items: OrderItem[];
@@ -54,7 +59,7 @@ const normalizeOrder = (raw: any): OrderDetails | null => {
         return null;
     }
 
-    const candidate = raw.order ?? raw.data ?? raw;
+    const candidate = raw.order ?? raw.data?.order ?? raw.data ?? raw;
     if (!candidate) {
         return null;
     }
@@ -83,6 +88,8 @@ const normalizeOrder = (raw: any): OrderDetails | null => {
             unitPrice: item.unitPrice ?? item.unit_price ?? price,
             size: item.size,
             color: item.color,
+            variantType: item.variantType ?? item.variant_type ?? item.variant?.variantType?.name ?? null,
+            variantValue: item.variantValue ?? item.variant_value ?? item.variant?.value ?? null,
             product,
             variant,
         };
@@ -93,16 +100,16 @@ const normalizeOrder = (raw: any): OrderDetails | null => {
         typeof shippingAddressRaw === 'string'
             ? shippingAddressRaw
             : [shippingAddressRaw?.line1, shippingAddressRaw?.line2].filter(Boolean).join(', ') ||
-              candidate.address ||
-              '';
+            candidate.address ||
+            '';
 
     const subtotal = toNumber(candidate.subtotal, NaN);
-    const shippingCharge = toNumber(candidate.shippingCharge ?? candidate.shipping_charge, 0);
+    const shippingCharge = toNumber(candidate.shippingCost ?? candidate.shipping_cost ?? candidate.shippingCharge ?? candidate.shipping_charge, 0);
     const totalAmount = toNumber(
         candidate.totalAmount ??
-            candidate.total ??
-            candidate.amount ??
-            (Number.isFinite(subtotal) ? subtotal + shippingCharge : NaN),
+        candidate.total ??
+        candidate.amount ??
+        (Number.isFinite(subtotal) ? subtotal + shippingCharge : NaN),
         0
     );
 
@@ -121,6 +128,7 @@ const normalizeOrder = (raw: any): OrderDetails | null => {
             candidate.country ??
             '',
         shippingMethod: candidate.shippingMethod ?? candidate.shipping_method ?? 'standard',
+        shippingCost: shippingCharge,
         paymentMethod: candidate.paymentMethod ?? candidate.payment_method ?? 'COD',
         customerNotes: candidate.customerNotes ?? candidate.notes ?? undefined,
         items,
@@ -134,6 +142,21 @@ export default function OrderSuccessPage() {
     const [order, setOrder] = useState<OrderDetails | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+
+    const formatVariantLabel = (item: OrderItem) => {
+        const labels: string[] = [];
+        if (item.variantValue) {
+            labels.push(`${item.variantType || 'Variant'}: ${item.variantValue}`);
+        } else {
+            if (item.variant?.color || item.color) {
+                labels.push(`Color: ${item.variant?.color || item.color}`);
+            }
+            if (item.variant?.size || item.size) {
+                labels.push(`Size: ${item.variant?.size || item.size}`);
+            }
+        }
+        return labels.length ? labels.join(' • ') : '';
+    };
 
     useEffect(() => {
         async function fetchOrderDetails() {
@@ -178,10 +201,13 @@ export default function OrderSuccessPage() {
                     return;
                 }
 
-                const apiUrl = process.env.NEXT_PUBLIC_APP_API_URL || 'http://localhost:5001/api';
-                const response = await fetch(`${apiUrl}/orders/${orderId}`, {
-                    credentials: 'include',
-                });
+                const apiUrl = process.env.APP_API_URL || 'http://localhost:5001/api';
+                const accessToken = getAccessToken();
+                const response = accessToken
+                    ? await authFetch(`/user/orders/${orderId}`)
+                    : await fetch(`${apiUrl}/orders/${orderId}`, {
+                        credentials: 'include',
+                    });
 
                 if (!response.ok) {
                     if (!usedLocal) {
@@ -293,10 +319,10 @@ export default function OrderSuccessPage() {
                                         const label =
                                             date && !Number.isNaN(date.getTime())
                                                 ? date.toLocaleDateString('en-US', {
-                                                      year: 'numeric',
-                                                      month: 'long',
-                                                      day: 'numeric',
-                                                  })
+                                                    year: 'numeric',
+                                                    month: 'long',
+                                                    day: 'numeric',
+                                                })
                                                 : '—';
                                         return <p className="font-semibold text-foreground">{label}</p>;
                                     })()}
@@ -341,10 +367,9 @@ export default function OrderSuccessPage() {
                                                     <p className="font-medium text-foreground text-sm">
                                                         {item.product?.name || `Product #${item.productId}`}
                                                     </p>
-                                                    {item.variant && (
+                                                    {formatVariantLabel(item) && (
                                                         <p className="text-xs text-muted-foreground">
-                                                            {item.variant.color && `${item.variant.color}`}
-                                                            {item.variant.size && ` | Size: ${item.variant.size}`}
+                                                            {formatVariantLabel(item)}
                                                         </p>
                                                     )}
                                                     <p className="text-sm font-semibold text-primary mt-1">
@@ -376,14 +401,15 @@ export default function OrderSuccessPage() {
                                 <div className="flex justify-between text-sm">
                                     <span className="text-muted-foreground">Shipping</span>
                                     <span className="font-medium text-foreground">
-                                        {order.shippingMethod?.toUpperCase() === 'STANDARD' ? 'FREE' : '৳10.00'}
+                                        ৳{order.shippingCost.toFixed(2)}
                                     </span>
                                 </div>
-                                <div className="flex justify-between text-lg font-bold border-t border-border pt-3">
-                                    <span className="text-foreground">Total</span>
-                                    <span className="text-primary">৳{order.totalAmount.toFixed(2)}</span>
-                                </div>
                             </div>
+                            <div className="flex justify-between text-lg font-bold border-t border-border pt-3">
+                                <span className="text-foreground">Total</span>
+                                <span className="text-primary">৳{order.totalAmount.toFixed(2)}</span>
+                            </div>
+
 
                             <div className="space-y-3 pt-6 border-t border-border">
                                 <Link href="/shop" className="block">
@@ -408,5 +434,6 @@ export default function OrderSuccessPage() {
                 </div>
             </div>
         </div>
+
     );
 }

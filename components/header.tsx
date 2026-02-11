@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { Search, ShoppingCart, Menu } from 'lucide-react';
+import { Search, ShoppingCart, Menu, User, LogOut, Heart, Package } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/lib/cart-context';
 import { useUI } from '@/lib/ui-context';
@@ -16,6 +16,8 @@ import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/
 import { Category } from '@/lib/categories';
 import Image from 'next/image';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { useAuth } from '@/lib/auth-context';
 
 interface HeaderProps {
   categories?: Category[];
@@ -26,6 +28,7 @@ export default function Header({ categories = [] }: HeaderProps) {
   const [language, setLanguage] = useState('EN');
   const { totalItems } = useCart();
   const { isCartOpen, openCart, closeCart } = useUI(); // Variable declared here
+  const { user, logout, isLoading } = useAuth();
   const isMobile = useMediaQuery('(max-width: 768px)');
   const topLevelCategories = categories.filter((c) => c.parentId === null);
   const topLevelCategoriesWithChildren = topLevelCategories.filter(
@@ -87,6 +90,48 @@ export default function Header({ categories = [] }: HeaderProps) {
                 </PopoverContent>
               </Popover> */}
 
+              {!isLoading && !user && (
+                <Link href="/login">
+                  <Button variant="ghost" size="sm" className="hidden sm:inline-flex">
+                    Sign In
+                  </Button>
+                </Link>
+              )}
+
+              {!isLoading && user && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="hover:bg-secondary/50">
+                      <User className="h-5 w-5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem asChild>
+                      <Link href="/account" className="flex items-center gap-2">
+                        <User className="h-4 w-4" />
+                        Account
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/account/orders" className="flex items-center gap-2">
+                        <Package className="h-4 w-4" />
+                        Orders
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/wishlist" className="flex items-center gap-2">
+                        <Heart className="h-4 w-4" />
+                        Wishlist
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={logout} className="flex items-center gap-2">
+                      <LogOut className="h-4 w-4" />
+                      Logout
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+
               {/* Cart Button */}
               <Button
                 variant="ghost"
@@ -125,6 +170,33 @@ export default function Header({ categories = [] }: HeaderProps) {
                         <Link href="/about" className="block px-4 py-3 text-sm font-medium text-foreground hover:bg-secondary/30 rounded-lg transition">
                           About
                         </Link>
+                        <Link href="/blog" className="block px-4 py-3 text-sm font-medium text-foreground hover:bg-secondary/30 rounded-lg transition">
+                          Blog
+                        </Link>
+                        {!isLoading && !user && (
+                          <Link href="/login" className="block px-4 py-3 text-sm font-medium text-foreground hover:bg-secondary/30 rounded-lg transition">
+                            Sign In
+                          </Link>
+                        )}
+                        {!isLoading && user && (
+                          <>
+                            <Link href="/account" className="block px-4 py-3 text-sm font-medium text-foreground hover:bg-secondary/30 rounded-lg transition">
+                              Account
+                            </Link>
+                            <Link href="/account/orders" className="block px-4 py-3 text-sm font-medium text-foreground hover:bg-secondary/30 rounded-lg transition">
+                              Orders
+                            </Link>
+                            <Link href="/wishlist" className="block px-4 py-3 text-sm font-medium text-foreground hover:bg-secondary/30 rounded-lg transition">
+                              Wishlist
+                            </Link>
+                            <button
+                              onClick={logout}
+                              className="block w-full text-left px-4 py-3 text-sm font-medium text-foreground hover:bg-secondary/30 rounded-lg transition"
+                            >
+                              Logout
+                            </button>
+                          </>
+                        )}
                       </nav>
 
                       {topLevelCategories.length > 0 && (

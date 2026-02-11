@@ -2,6 +2,7 @@ import React from "react"
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
+import { AuthProvider } from '@/lib/auth-context'
 import { CartProvider } from '@/lib/cart-context'
 import { UIProvider } from '@/lib/ui-context'
 import Header from '@/components/header'
@@ -31,15 +32,17 @@ export default async function RootLayout({
     <html lang="en">
       <body className={`font-sans antialiased bg-background text-foreground`}>
         <UIProvider>
-          <CartProvider>
-            <Header categories={categories} />
-            <main className="min-h-screen">
-              {children}
-            </main>
-            <Footer />
-            <FloatingCallButton />
-            <Toaster />
-          </CartProvider>
+          <AuthProvider>
+            <CartProvider>
+              <Header categories={categories} />
+              <main className="min-h-screen">
+                {children}
+              </main>
+              <Footer />
+              <FloatingCallButton />
+              <Toaster />
+            </CartProvider>
+          </AuthProvider>
         </UIProvider>
         <Analytics />
       </body>

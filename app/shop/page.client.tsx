@@ -104,6 +104,7 @@ export default function ShopClient({ initialProducts, initialCategories }: ShopC
             size: 'M', // Default
             color: 'Default',
             image: productImages[0] || '',
+            productId: product.id,
         });
         toast({
             title: 'Added to cart',

@@ -1,6 +1,6 @@
 'use client';
 
-import { useCart } from '@/lib/cart-context';
+import { useCart, type CartItem } from '@/lib/cart-context';
 import { Plus, Minus, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,21 @@ interface CartSidebarProps {
 
 export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
   const { items, removeItem, updateQuantity, totalPrice, clearCart } = useCart();
+
+  const formatVariantLabel = (item: CartItem) => {
+    const labels: string[] = [];
+    if (item.variantValue) {
+      labels.push(`${item.variantType || 'Variant'}: ${item.variantValue}`);
+    } else {
+      if (item.color && item.color !== 'Default') {
+        labels.push(`Color: ${item.color}`);
+      }
+      if (item.size && item.size !== 'Default' && item.size !== 'One Size') {
+        labels.push(`Size: ${item.size}`);
+      }
+    }
+    return labels.length ? labels.join(' • ') : 'Standard';
+  };
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
@@ -40,7 +55,7 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                       <div className="flex-1">
                         <h3 className="font-medium text-foreground text-sm">{item.name}</h3>
                         <p className="text-xs text-muted-foreground">
-                          {item.color} | Size: {item.size}
+                          {formatVariantLabel(item)}
                         </p>
                         <p className="text-sm font-semibold text-primary mt-1">৳{Math.floor(item.price)} x {item.quantity} = {Math.floor(item.price * item.quantity)}</p>
 
