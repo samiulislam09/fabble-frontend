@@ -14,39 +14,34 @@ export function CategoryCard({ category, className }: CategoryCardProps) {
     return (
         <Link
             href={`/shop?category=${encodeURIComponent(category.name)}`}
-            className={cn("group relative block aspect-[3/4] overflow-hidden rounded-2xl bg-gray-100", className)}
+            className={cn(
+                "group relative flex aspect-[4/3] flex-col items-center justify-between overflow-hidden rounded-2xl bg-gradient-to-br from-gray-50 to-gray-100 p-6 transition-all duration-500 hover:shadow-xl hover:-translate-y-1",
+                className
+            )}
         >
-            {/* Background Image */}
-            <img
-                src={category.image || "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&h=1000&fit=crop"} // Fallback image
-                alt={category.name}
-                className="h-full w-full object-cover object-center transition-transform duration-700 group-hover:scale-110"
-            />
-
-            {/* Overlay - Gradient */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 transition-opacity duration-300 group-hover:opacity-70" />
+            {/* Abstract Decorative Background */}
+            <div className="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-primary/5 blur-3xl transition-all duration-700 group-hover:bg-primary/10" />
+            <div className="absolute -bottom-12 -left-12 h-32 w-32 rounded-full bg-secondary/10 blur-3xl transition-all duration-700 group-hover:bg-secondary/20" />
 
             {/* Content */}
-            <div className="absolute inset-0 flex flex-col justify-end p-6 md:p-8">
-                <div className="transform transition-transform duration-300 group-hover:-translate-y-2">
-                    {/* Decorative Line */}
-                    <div className="mb-3 h-1 w-12 origin-left scale-0 bg-white transition-transform duration-500 group-hover:scale-100" />
-
-                    <h3 className="text-2xl font-bold text-white md:text-3xl font-serif tracking-wide">
-                        {category.name}
-                    </h3>
-
-                    {/* Subtitle/Description - optional if category has description or just generic text */}
-                    <p className="mt-2 text-sm font-medium text-white/80 opacity-0 transition-opacity duration-500 group-hover:opacity-100">
-                        Explore Collection
-                    </p>
+            <div className="relative z-10 flex h-full w-full flex-col justify-between">
+                <div>
+                    <span className="inline-block rounded-full bg-white/50 px-3 py-1 text-[10px] font-medium uppercase tracking-wider text-muted-foreground backdrop-blur-sm transition-colors group-hover:bg-white/80">
+                        Collection
+                    </span>
                 </div>
 
-                {/* Action Icon */}
-                <div className="absolute bottom-6 right-6 translate-y-4 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 md:bottom-8 md:right-8">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20 backdrop-blur-md text-white transition-colors hover:bg-white hover:text-black">
-                        <ArrowRight className="h-5 w-5" />
-                    </div>
+                <div className="text-center">
+                    <h3 className="font-serif text-2xl font-medium text-foreground tracking-tight transition-transform duration-300 group-hover:scale-105">
+                        {category.name}
+                    </h3>
+                    <div className="mt-3 h-px w-8 mx-auto bg-primary/20 transition-all duration-500 group-hover:w-16 group-hover:bg-primary/50" />
+                </div>
+
+                <div className="flex justify-center opacity-0 transform translate-y-4 transition-all duration-500 group-hover:opacity-100 group-hover:translate-y-0">
+                    <span className="flex items-center gap-2 text-xs font-semibold text-primary">
+                        Shop Now <ArrowRight className="h-3 w-3" />
+                    </span>
                 </div>
             </div>
         </Link>

@@ -10,33 +10,16 @@ interface HeroSliderProps {
   carousels?: Carousel[];
 }
 
-// Fallback slides if no data provided
-const defaultSlides = [
-  {
-    id: 1,
-    title: 'Elevate Your Wardrobe',
-    subtitle: 'Premium Clothing Collection',
-    description: 'Discover carefully curated pieces that combine timeless elegance with contemporary style. Express your individuality through fashion.',
-    cta: 'Explore Collection',
-    link: '/shop',
-    image: 'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=1200&h=800&fit=crop',
-  },
-  {
-    id: 2,
-    title: 'New Arrivals',
-    subtitle: 'Fresh Styles',
-    description: 'Check out our latest collection featuring the most trendy and comfortable pieces for the season.',
-    cta: 'Shop New Arrivals',
-    link: '/shop?sort=new',
-    image: 'https://images.unsplash.com/photo-1595551900611-68613ce5583e?w=1200&h=800&fit=crop',
-  }
-];
-
 export default function HeroSlider({ carousels = [] }: HeroSliderProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const autoPlayRef = useRef<NodeJS.Timeout | null>(null);
 
-  const slides = carousels.length > 0 ? carousels : defaultSlides;
+  // If no carousels, don't render anything
+  if (!carousels || carousels.length === 0) {
+    return null;
+  }
+
+  const slides = carousels;
 
   useEffect(() => {
     autoPlayRef.current = setInterval(() => {

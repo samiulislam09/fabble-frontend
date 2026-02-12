@@ -104,7 +104,7 @@ export const getProducts = async (): Promise<ProductsResponse | undefined> => {
     return undefined;
   }
 
-  const url = `${baseUrl}/products`;
+  const url = `${baseUrl}/products?isVisible=true&isActive=true`;
 
   try {
     // The getRequest returns the response body directly which matches ProductsResponse structure

@@ -7,10 +7,10 @@ import { useCart } from '@/lib/cart-context';
 import { useUI } from '@/lib/ui-context';
 import { useToast } from '@/hooks/use-toast';
 import ProductCard from '@/components/product-card';
-import { Heart, ShoppingCart, Check } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { colorMap } from '@/lib/colors';
+import { Heart, ShoppingCart, Check, XCircle } from 'lucide-react';
+
 import { useAuth } from '@/lib/auth-context';
+import { colorMap } from '@/lib/colors';
 import { authFetch } from '@/lib/auth-fetch';
 
 const parsePrice = (price: string | number) => typeof price === 'string' ? parseFloat(price) : price;
@@ -351,23 +351,7 @@ export default function ProductDetailsClient({ product, relatedProducts }: Produ
                                             // Check availability of this specific value in combination with other selected options?
                                             // For simplicity, just render.
 
-                                            if (isColor) {
-                                                const hexColor = colorMap[val.toLowerCase()] || '#CCCCCC';
-                                                return (
-                                                    <TooltipProvider key={val}>
-                                                        <Tooltip>
-                                                            <TooltipTrigger asChild>
-                                                                <button
-                                                                    onClick={() => handleOptionSelect(idx, val)}
-                                                                    className={`w-10 h-10 rounded-full border-2 transition transform hover:scale-110 ${isSelected ? 'border-primary ring-2 ring-primary ring-offset-2' : 'border-border'}`}
-                                                                    style={{ backgroundColor: hexColor }}
-                                                                />
-                                                            </TooltipTrigger>
-                                                            <TooltipContent><p>{val}</p></TooltipContent>
-                                                        </Tooltip>
-                                                    </TooltipProvider>
-                                                )
-                                            }
+
 
                                             return (
                                                 <button
@@ -397,9 +381,23 @@ export default function ProductDetailsClient({ product, relatedProducts }: Produ
                             <span className="px-6 py-2 font-semibold">{quantity}</span>
                             <button onClick={() => setQuantity(quantity + 1)} className="px-4 py-2 text-foreground hover:bg-muted transition">+</button>
                         </div>
-                        <Button size="lg" className="flex-1" onClick={handleAddToCart} disabled={hasVariants && !selectedVariant}>
-                            <ShoppingCart className="h-5 w-5 mr-2" />
-                            Add to Cart
+                        <Button
+                            size="lg"
+                            className={`flex-1 ${stockQuantity <= 0 ? 'bg-red-600 hover:bg-red-700 text-white' : ''}`}
+                            onClick={handleAddToCart}
+                            disabled={(hasVariants && !selectedVariant) || stockQuantity <= 0}
+                        >
+                            {stockQuantity <= 0 ? (
+                                <>
+                                    <XCircle className="h-5 w-5 mr-2" />
+                                    Out of Stock
+                                </>
+                            ) : (
+                                <>
+                                    <ShoppingCart className="h-5 w-5 mr-2" />
+                                    Add to Cart
+                                </>
+                            )}
                         </Button>
                         <button
                             onClick={async () => {
