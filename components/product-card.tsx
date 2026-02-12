@@ -18,7 +18,7 @@ const parseImages = (images: string | string[]): string[] => {
     if (images.length === 1 && images[0].includes(',')) {
       return images[0].split(',').map(img => img.trim()).filter(Boolean);
     }
-    return images.flatMap(img => 
+    return images.flatMap(img =>
       img.includes(',') ? img.split(',').map(i => i.trim()).filter(Boolean) : [img]
     );
   }
@@ -106,62 +106,67 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
   return (
     <div className="group relative">
       <Link href={`/product/${product.id}`} className="block h-full">
-        <div className="relative overflow-hidden bg-secondary/20 aspect-square rounded-2xl mb-4">
+        {/* Image Container */}
+        <div className="relative overflow-hidden bg-secondary/5 aspect-[3/4] rounded-lg mb-4">
           <img
             src={mainImage || "/placeholder.svg"}
             alt={product.name}
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
           />
 
-          {/* Trend Badge */}
-          {isTrending && (
-            <span className="absolute top-4 left-4 bg-primary text-primary-foreground text-xs font-semibold px-3 py-1.5 rounded-full z-10">
-              Trending
-            </span>
-          )}
+          {/* Overlay Gradient for Text Contrast (Subtle) */}
+          <div className="absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/5" />
 
-          {/* Quick Actions Overlay */}
-          <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-            <div className="absolute top-4 right-4 flex flex-col gap-2 translate-x-10 group-hover:translate-x-0 transition-transform duration-300 delay-75">
-              <Button
-                variant="secondary"
-                size="icon"
-                className="rounded-full shadow-md bg-white hover:bg-gray-100 h-10 w-10"
-                onClick={handleWishlist}
-              >
-                <Heart className={`h-5 w-5 ${isWishlisted ? 'fill-red-500 text-red-500' : 'text-foreground'}`} />
-              </Button>
-                <Button
-                  variant="secondary"
-                  size="icon"
-                  className="rounded-full shadow-md bg-white hover:bg-gray-100 h-10 w-10"
-                  title="View Details"
-                >
-                  <Eye className="h-5 w-5 text-foreground" />
-                </Button>
-            </div>
-
-            {/* Add to Cart Button Centered on Hover */}
-            {/* <div className="absolute bottom-4 left-1/2 -translate-x-1/2 translate-y-10 group-hover:translate-y-0 transition-transform duration-300 w-[calc(100%-2rem)]">
-              <Button
-                className="w-full rounded-xl shadow-lg"
-                onClick={handleAddToCart}
-                disabled={isInCart}
-              >
-                {isInCart ? 'In Cart' : 'Add to Cart'}
-              </Button>
-            </div> */}
+          {/* Floating Actions (Top Right) */}
+          <div className="absolute top-3 right-3 flex flex-col gap-2 translate-x-12 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100">
+            <Button
+              variant="secondary"
+              size="icon"
+              className="h-9 w-9 rounded-full bg-white/90 backdrop-blur-sm shadow-sm hover:bg-white"
+              onClick={handleWishlist}
+            >
+              <Heart className={`h-4 w-4 ${isWishlisted ? 'fill-red-500 text-red-500' : 'text-foreground'}`} />
+            </Button>
+            <Button
+              variant="secondary"
+              size="icon"
+              className="h-9 w-9 rounded-full bg-white/90 backdrop-blur-sm shadow-sm hover:bg-white"
+              title="View Details"
+            >
+              <Eye className="h-4 w-4 text-foreground" />
+            </Button>
           </div>
+
+          {/* Quick Add Button (Bottom) */}
+          {/* <div className="absolute bottom-4 left-4 right-4 translate-y-12 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
+            <Button
+              className="w-full bg-white/90 backdrop-blur-md text-foreground hover:bg-white hover:text-primary shadow-lg"
+              onClick={handleAddToCart}
+              disabled={isInCart}
+            >
+              {isInCart ? 'In Cart' : 'Quick Add'}
+            </Button>
+          </div> */}
+
+          {/* Badges */}
+          {isTrending && (
+            <div className="absolute top-3 left-3">
+              <Badge variant="secondary" className="bg-white/90 backdrop-blur-md text-xs font-medium px-2 py-0.5 shadow-sm">
+                Trending
+              </Badge>
+            </div>
+          )}
         </div>
 
-        <div className="space-y-2">
-          <h3 className="font-semibold text-foreground line-clamp-2 group-hover:text-primary transition-colors">
+        {/* Product Info */}
+        <div className="space-y-1">
+          <h3 className="font-medium text-foreground text-base leading-snug group-hover:underline decoration-1 underline-offset-4 transition-all">
             {product.name}
           </h3>
-          <div className="flex items-center gap-2">
-            <span className="text-lg font-semibold text-primary">৳{price.toFixed(2)}</span>
+          <div className="flex items-center gap-2 text-sm">
+            <span className="font-semibold text-foreground">৳{price.toFixed(2)}</span>
             {comparePrice && (
-              <span className="text-sm text-muted-foreground line-through">৳{comparePrice.toFixed(2)}</span>
+              <span className="text-muted-foreground line-through text-xs">৳{comparePrice.toFixed(2)}</span>
             )}
           </div>
         </div>

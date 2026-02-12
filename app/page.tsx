@@ -1,9 +1,13 @@
-import { getProducts } from '@/lib/products';
+import { getProducts, getNewArrivals, getSaleProducts } from '@/lib/products';
 import { getCategories } from '@/lib/categories';
 import { getCarousels } from '@/lib/carousels';
+import { getBrands } from '@/lib/brands';
+import { getBlogs } from '@/lib/blogs';
 import ProductCard from '@/components/product-card';
 import ProductSlider from '@/components/product-slider';
 import HeroSlider from '@/components/hero-slider';
+import BrandSlider from '@/components/brand-slider';
+import BlogGrid from '@/components/blog-grid';
 import NewsletterSignup from '@/components/newsletter-signup';
 import { CategoryCard } from '@/components/category-card';
 import { Button } from '@/components/ui/button';
@@ -18,9 +22,13 @@ export default async function Home() {
   const categories = categoriesResponse?.categories || [];
 
   const carousels = await getCarousels();
+  const brands = await getBrands();
+  const blogs = await getBlogs();
+  const newArrivals = await getNewArrivals();
+  const saleProducts = await getSaleProducts();
 
-  const trendingProducts = products.filter((p) => p.isFeatured); // Mapping isFeatured to trending for now as isTrending isn't on API types explicitly or usage needs verification
-  const bestSellerProducts = products.filter((p) => p.isFeatured); // Reuse featured for demo if fields missing
+  const trendingProducts = products.filter((p) => p.isFeatured);
+  const bestSellerProducts = products.filter((p) => p.isFeatured);
   const allProducts = products;
 
   return (
@@ -30,6 +38,17 @@ export default async function Home() {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 space-y-24">
+
+        {/* New Arrivals */}
+        {newArrivals.length > 0 && (
+          <section>
+            <div className="mb-12">
+              <p className="text-sm font-semibold text-primary tracking-widest uppercase mb-2">Just Landed</p>
+              <h2 className="text-4xl md:text-5xl font-serif text-foreground">New Arrivals</h2>
+            </div>
+            <ProductSlider products={newArrivals} infinite />
+          </section>
+        )}
 
         {/* Trending Products */}
         <section>
@@ -77,6 +96,13 @@ export default async function Home() {
           </div>
         </section>
 
+        {/* Brands Section */}
+        {/* {brands.length > 0 && (
+          <section>
+            <BrandSlider brands={brands} title="Our Brands" />
+          </section>
+        )} */}
+
         {/* Best Sellers */}
         <section>
           <div className="mb-12">
@@ -85,6 +111,17 @@ export default async function Home() {
           </div>
           <ProductSlider products={bestSellerProducts} infinite />
         </section>
+
+        {/* Clearance / Sale Section */}
+        {/* {saleProducts.length > 0 && (
+          <section>
+            <div className="mb-12">
+              <p className="text-sm font-semibold text-destructive tracking-widest uppercase mb-2">Limited Time Offers</p>
+              <h2 className="text-4xl md:text-5xl font-serif text-foreground">Clearance & Sale</h2>
+            </div>
+            <ProductSlider products={saleProducts} infinite />
+          </section>
+        )} */}
 
         {/* All Products */}
         <section>
@@ -107,6 +144,17 @@ export default async function Home() {
             ))}
           </div>
         </section>
+
+        {/* Blog Section */}
+        {/* {blogs.length > 0 && (
+          <section>
+            <div className="mb-12 flex flex-col items-center text-center">
+              <p className="text-sm font-semibold text-primary tracking-widest uppercase mb-3">Read Our Journal</p>
+              <h2 className="text-4xl md:text-5xl font-serif text-foreground mb-4">Latest Stories</h2>
+            </div>
+            <BlogGrid blogs={blogs} />
+          </section>
+        )} */}
 
         {/* Newsletter Section */}
         <section className="relative rounded-3xl bg-gradient-to-br from-primary/20 to-accent/10 p-12 md:p-16 overflow-hidden">
@@ -131,3 +179,4 @@ export default async function Home() {
     </div>
   );
 }
+

@@ -336,7 +336,7 @@ export default function ProductDetailsClient({ product, relatedProducts }: Produ
                         <p className="text-sm text-green-600 font-medium">{stockQuantity > 0 ? '✓ In Stock' : '✗ Out of Stock'}</p>
                     </div>
 
-                    <p className="text-foreground/80 leading-relaxed">{product.description}</p>
+
 
                     {hasVariants && (
                         <div className="space-y-4">
@@ -427,6 +427,16 @@ export default function ProductDetailsClient({ product, relatedProducts }: Produ
                         <div className="flex items-center gap-3"><Check className="h-5 w-5 text-green-600" /><span className="text-sm text-foreground">7-day easy returns</span></div>
                         <div className="flex items-center gap-3"><Check className="h-5 w-5 text-green-600" /><span className="text-sm text-foreground">Secure checkout</span></div>
                     </div>
+                </div>
+            </div>
+
+            {/* Description Section */}
+            <div className="mb-16 max-w-4xl">
+                <h2 className="text-2xl font-bold text-foreground mb-6 font-serif">Description</h2>
+                <div className="prose prose-neutral dark:prose-invert max-w-none">
+                    <p className="text-foreground/80 leading-relaxed whitespace-pre-line text-lg">
+                        {product.description}
+                    </p>
                 </div>
             </div>
 

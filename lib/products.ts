@@ -142,3 +142,22 @@ export const getProduct = async (id: string): Promise<Product | undefined> => {
     return undefined;
   }
 };
+
+export const getNewArrivals = async (limit: number = 8): Promise<Product[]> => {
+  const productsResponse = await getProducts();
+  if (!productsResponse?.products) return [];
+
+  // Sort by createdAt desc in case API didn't
+  return productsResponse.products
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, limit);
+};
+
+export const getSaleProducts = async (limit: number = 8): Promise<Product[]> => {
+  const productsResponse = await getProducts();
+  if (!productsResponse?.products) return [];
+
+  return productsResponse.products
+    .filter(p => p.comparePrice && parseFloat(p.comparePrice) > parseFloat(p.price))
+    .slice(0, limit);
+};
