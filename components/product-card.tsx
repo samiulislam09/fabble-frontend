@@ -10,7 +10,6 @@ import { useUI } from '@/lib/ui-context';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/lib/auth-context';
 import { authFetch } from '@/lib/auth-fetch';
-import { useToast } from '@/hooks/use-toast';
 
 // Helper to parse images - handles comma-separated string or array
 const parseImages = (images: string | string[]): string[] => {
@@ -40,7 +39,6 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
   const { items, addItem } = useCart();
   const { openCart } = useUI();
   const { user } = useAuth();
-  const { toast } = useToast();
 
   // Check if product is in cart (by any size/color combination)
   const isInCart = items.some((item) => item.id === product.id.toString());
@@ -73,14 +71,7 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
 
   const handleWishlist = async (e: React.MouseEvent) => {
     e.preventDefault();
-    if (!user) {
-      toast({
-        title: 'Sign in required',
-        description: 'Please sign in to save items to your wishlist.',
-        variant: 'destructive'
-      });
-      return;
-    }
+    if (!user) return;
 
     const response = await authFetch('/wishlist/add', {
       method: 'POST',
@@ -90,14 +81,6 @@ export default function ProductCard({ product, onAddToCart }: ProductCardProps) 
 
     if (response.ok) {
       setIsWishlisted(true);
-      toast({ title: 'Added to wishlist' });
-    } else {
-      const data = await response.json().catch(() => ({}));
-      toast({
-        title: 'Wishlist',
-        description: data?.message || 'Could not update wishlist.',
-        variant: 'destructive'
-      });
     }
   };
 

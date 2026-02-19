@@ -9,7 +9,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useToast } from '@/hooks/use-toast';
 
 interface ProfileFormData {
   name: string;
@@ -23,7 +22,6 @@ interface ProfileFormData {
 
 export default function AccountPage() {
   const { user, isLoading } = useAuth();
-  const { toast } = useToast();
   const [formData, setFormData] = useState<ProfileFormData>({
     name: '',
     email: '',
@@ -97,20 +95,7 @@ export default function AccountPage() {
 
     setIsSaving(false);
 
-    if (!response.ok) {
-      const data = await response.json().catch(() => ({}));
-      toast({
-        title: 'Update failed',
-        description: data?.message || 'Could not update profile.',
-        variant: 'destructive'
-      });
-      return;
-    }
-
-    toast({
-      title: 'Profile updated',
-      description: 'Your account details have been saved.'
-    });
+    if (!response.ok) return;
   };
 
   return (

@@ -75,6 +75,7 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
                             size="icon"
                             className="h-8 w-8 bg-transparent"
                             onClick={() => updateQuantity(item.id, item.size, item.color, item.quantity + 1)}
+                            disabled={item.quantity >= 10}
                           >
                             <Plus className="h-3 w-3" />
                           </Button>

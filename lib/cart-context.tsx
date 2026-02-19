@@ -197,7 +197,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       if (existingItem) {
         return prev.map((item) =>
           item.id === newItem.id && item.size === newItem.size && item.color === newItem.color
-            ? { ...item, quantity: item.quantity + newItem.quantity }
+            ? { ...item, quantity: Math.min(item.quantity + newItem.quantity, 10) }
             : item
         );
       }
@@ -222,11 +222,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setItems((prev) => prev.filter((item) => !(item.id === id && item.size === size && item.color === color)));
   };
 
+  const MAX_QUANTITY = 10;
+
   const updateQuantity = async (id: string, size: string, color: string, quantity: number) => {
     if (quantity <= 0) {
       await removeItem(id, size, color);
       return;
     }
+
+    const capped = Math.min(quantity, MAX_QUANTITY);
 
     if (isServerMode) {
       const target = items.find((item) => item.id === id && item.size === size && item.color === color);
@@ -234,7 +238,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const response = await authFetch(`/cart/item/${target.cartItemId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ quantity })
+        body: JSON.stringify({ quantity: capped })
       });
       if (response.ok) {
         await syncServerCart();
@@ -244,7 +248,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
     setItems((prev) =>
       prev.map((item) =>
-        item.id === id && item.size === size && item.color === color ? { ...item, quantity } : item
+        item.id === id && item.size === size && item.color === color ? { ...item, quantity: capped } : item
       )
     );
   };

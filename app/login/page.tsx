@@ -7,12 +7,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/lib/auth-context';
 
 export default function LoginPage() {
   const { user, login, register } = useAuth();
-  const { toast } = useToast();
   const router = useRouter();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -39,33 +37,14 @@ export default function LoginPage() {
     const result = await login(loginForm);
     setIsSubmitting(false);
 
-    if (!result.success) {
-      toast({
-        title: 'Login failed',
-        description: result.message || 'Please check your credentials and try again.',
-        variant: 'destructive'
-      });
-      return;
-    }
-
-    toast({
-      title: 'Welcome back',
-      description: 'You are now signed in.'
-    });
+    if (!result.success) return;
     router.push('/account');
   };
 
   const handleRegister = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (registerForm.password !== registerForm.confirmPassword) {
-      toast({
-        title: 'Passwords do not match',
-        description: 'Please confirm your password.',
-        variant: 'destructive'
-      });
-      return;
-    }
+    if (registerForm.password !== registerForm.confirmPassword) return;
 
     setIsSubmitting(true);
     const result = await register({
@@ -76,19 +55,7 @@ export default function LoginPage() {
     });
     setIsSubmitting(false);
 
-    if (!result.success) {
-      toast({
-        title: 'Registration failed',
-        description: result.message || 'Please try again.',
-        variant: 'destructive'
-      });
-      return;
-    }
-
-    toast({
-      title: 'Account created',
-      description: 'Welcome to Fabble!'
-    });
+    if (!result.success) return;
     router.push('/account');
   };
 

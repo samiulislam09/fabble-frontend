@@ -3,24 +3,15 @@
 import React from 'react';
 
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
 
 export default function NewsletterSignup() {
-  const { toast } = useToast();
   const [email, setEmail] = React.useState('');
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!email.trim()) {
-      toast({
-        title: 'Email required',
-        description: 'Please enter an email address to subscribe.',
-        variant: 'destructive',
-      });
-      return;
-    }
+    if (!email.trim()) return;
 
     setIsSubmitting(true);
 
@@ -32,26 +23,10 @@ export default function NewsletterSignup() {
       });
 
       if (response.status === 201) {
-        toast({
-          title: 'Subscription confirmed',
-          description: 'Thanks for joining the newsletter.',
-        });
         setEmail('');
-        return;
       }
-
-      const data = await response.json().catch(() => ({}));
-      toast({
-        title: 'Subscription failed',
-        description: data?.error || 'Please try again in a moment.',
-        variant: 'destructive',
-      });
-    } catch (error) {
-      toast({
-        title: 'Subscription failed',
-        description: error instanceof Error ? error.message : 'Please try again in a moment.',
-        variant: 'destructive',
-      });
+    } catch {
+      // silent
     } finally {
       setIsSubmitting(false);
     }

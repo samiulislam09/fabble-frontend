@@ -7,7 +7,6 @@ import { useSearchParams } from 'next/navigation';
 import ProductCard from '@/components/product-card';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/lib/cart-context';
-import { useToast } from '@/hooks/use-toast';
 import { ChevronDown } from 'lucide-react';
 // import { categoryMap } from '@/lib/category-map'; // Removed unused import
 
@@ -38,7 +37,6 @@ interface ShopClientProps {
 export default function ShopClient({ initialProducts, initialCategories }: ShopClientProps) {
     const searchParams = useSearchParams();
     const { addItem } = useCart();
-    const { toast } = useToast();
 
     const products = initialProducts;
 
@@ -106,10 +104,6 @@ export default function ShopClient({ initialProducts, initialCategories }: ShopC
             image: productImages[0] || '',
             productId: product.id,
         });
-        toast({
-            title: 'Added to cart',
-            description: `${product.name} has been added to your cart`,
-        });
     };
 
     return (
@@ -162,7 +156,7 @@ export default function ShopClient({ initialProducts, initialCategories }: ShopC
                                 <input
                                     type="range"
                                     min="0"
-                                    max="250"
+                                    max="5000"
                                     value={priceRange[1]}
                                     onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value)])}
                                     className="w-full"

@@ -8,7 +8,6 @@ import { UIProvider } from '@/lib/ui-context'
 import Header from '@/components/header'
 import Footer from '@/components/footer'
 import FloatingCallButton from '@/components/floating-call-button'
-import { Toaster } from '@/components/ui/toaster'
 import './globals.css'
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
@@ -37,7 +36,6 @@ export default async function RootLayout({
               </main>
               <Footer />
               <FloatingCallButton />
-              <Toaster />
             </CartProvider>
           </AuthProvider>
         </UIProvider>

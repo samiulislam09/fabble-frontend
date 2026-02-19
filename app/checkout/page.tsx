@@ -6,13 +6,11 @@ import { useCart, type CartItem } from '@/lib/cart-context';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useToast } from '@/hooks/use-toast';
 import { createOrder, type CheckoutFormData } from './actions';
 import { getAccessToken } from '@/lib/auth';
 import { useAuth } from '@/lib/auth-context';
@@ -37,7 +35,6 @@ const resolveOrderId = (data: any, fallback?: string | number) => {
 
 export default function CheckoutPage() {
   const { items, totalPrice, clearCart } = useCart();
-  const { toast } = useToast();
   const router = useRouter();
   const { user } = useAuth();
 
@@ -48,7 +45,7 @@ export default function CheckoutPage() {
     email: '',
     phone: '',
     address: '',
-    shippingZone: 'INSIDE_DHAKA',
+    shippingZone: '',
     cardName: '',
     cardNumber: '',
     cardExpiry: '',
@@ -56,6 +53,7 @@ export default function CheckoutPage() {
   });
 
   const [isProcessing, setIsProcessing] = useState(false);
+  const [zoneError, setZoneError] = useState(false);
 
   const formatVariantLabel = (item: CartItem) => {
     const labels: string[] = [];
@@ -99,27 +97,20 @@ export default function CheckoutPage() {
       if (!formData.lastName.trim()) missingFields.push('Last Name');
       if (!formData.email.trim()) missingFields.push('Email');
       if (!formData.phone.trim()) missingFields.push('Phone');
-      if (!formData.shippingZone) missingFields.push('Delivery Zone');
+      if (!formData.shippingZone) {
+        setZoneError(true);
+        missingFields.push('Delivery Zone');
+      }
       if (!formData.address.trim()) missingFields.push('Street Address');
 
       if (missingFields.length > 0) {
         setIsProcessing(false);
-        toast({
-          title: 'Missing information',
-          description: `Please complete: ${missingFields.join(', ')}`,
-          variant: 'destructive',
-        });
         return;
       }
 
       const phoneDigits = formData.phone.replace(/\D/g, '');
       if (phoneDigits.length < 10) {
         setIsProcessing(false);
-        toast({
-          title: 'Invalid phone number',
-          description: 'Phone number must be at least 10 digits.',
-          variant: 'destructive',
-        });
         return;
       }
 
@@ -162,11 +153,6 @@ export default function CheckoutPage() {
     } catch (error) {
       console.error('Order placement error:', error);
       setIsProcessing(false);
-      toast({
-        title: 'Order Failed',
-        description: error instanceof Error ? error.message : 'There was a problem placing your order. Please try again.',
-        variant: 'destructive',
-      });
     }
   };
 
@@ -252,19 +238,38 @@ export default function CheckoutPage() {
 
 
                   <div className="space-y-2">
-                    <Label htmlFor="shippingZone">Delivery Zone</Label>
-                    <Select
-                      value={formData.shippingZone}
-                      onValueChange={(value) => setFormData(prev => ({ ...prev, shippingZone: value }))}
-                    >
-                      <SelectTrigger id="shippingZone">
-                        <SelectValue placeholder="Select Delivery Zone" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="INSIDE_DHAKA">Inside Dhaka (৳80)</SelectItem>
-                        <SelectItem value="OUTSIDE_DHAKA">Outside Dhaka (৳110)</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Label>Delivery Zone <span className="text-destructive">*</span></Label>
+                    <div className="grid grid-cols-2 gap-3">
+                      {[
+                        { value: 'INSIDE_DHAKA', label: 'Inside Dhaka', charge: '৳80' },
+                        { value: 'OUTSIDE_DHAKA', label: 'Outside Dhaka', charge: '৳110' },
+                      ].map(({ value, label, charge }) => {
+                        const selected = formData.shippingZone === value;
+                        return (
+                          <button
+                            key={value}
+                            type="button"
+                            onClick={() => {
+                              setFormData(prev => ({ ...prev, shippingZone: value }));
+                              setZoneError(false);
+                            }}
+                            className={`flex flex-col items-center justify-center gap-1 rounded-lg border-2 px-4 py-3 text-sm font-medium transition-colors
+                              ${selected
+                                ? 'border-primary bg-primary/10 text-primary'
+                                : zoneError
+                                  ? 'border-destructive bg-destructive/5 text-foreground hover:border-primary hover:bg-primary/5'
+                                  : 'border-border text-foreground hover:border-primary hover:bg-primary/5'
+                              }`}
+                          >
+                            <span>{label}</span>
+                            <span className={`text-xs font-semibold ${selected ? 'text-primary' : 'text-muted-foreground'}`}>{charge}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {zoneError && (
+                      <p className="text-xs text-destructive mt-1">Please select a delivery zone to continue.</p>
+                    )}
                   </div>
 
                   <div className="space-y-2">

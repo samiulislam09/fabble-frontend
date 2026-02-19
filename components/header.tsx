@@ -10,7 +10,6 @@ import { useMediaQuery } from '@/hooks/use-mobile';
 import CartSidebar from './cart-sidebar';
 import CategoryNav from './category-nav';
 import SearchBar from './search-bar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Category } from '@/lib/categories';
@@ -25,7 +24,6 @@ interface HeaderProps {
 
 export default function Header({ categories = [] }: HeaderProps) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [language, setLanguage] = useState('EN');
   const { totalItems } = useCart();
   const { isCartOpen, openCart, closeCart } = useUI(); // Variable declared here
   const { user, logout, isLoading } = useAuth();

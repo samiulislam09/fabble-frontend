@@ -106,6 +106,7 @@ export default function CartPage() {
                                                     size="icon"
                                                     className="h-8 w-8"
                                                     onClick={() => updateQuantity(item.id, item.size, item.color, item.quantity + 1)}
+                                                    disabled={item.quantity >= 10}
                                                 >
                                                     <Plus className="h-3 w-3" />
                                                 </Button>

@@ -5,7 +5,6 @@ import ProductCard from './product-card';
 import { useEffect, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useCart } from '@/lib/cart-context';
-import { useToast } from '@/hooks/use-toast';
 
 // Helper to parse images - handles comma-separated string or array
 const parseImages = (images: string | string[]): string[] => {
@@ -38,7 +37,6 @@ export default function ProductSlider({ products, title, infinite = true, autoPl
   const autoPlayRef = useRef<NodeJS.Timeout | null>(null);
 
   const { addItem } = useCart();
-  const { toast } = useToast();
 
   const scroll = (direction: 'left' | 'right') => {
     if (containerRef.current) {
@@ -111,10 +109,6 @@ export default function ProductSlider({ products, title, infinite = true, autoPl
       color: 'Default', // Default as not in API
       image: productImages[0] || '',
       productId: product.id,
-    });
-    toast({
-      title: 'Added to cart',
-      description: `${product.name} has been added to your cart`,
     });
   };
 

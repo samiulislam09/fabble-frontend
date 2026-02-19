@@ -7,7 +7,6 @@ import { useAuth } from '@/lib/auth-context';
 import { useCart } from '@/lib/cart-context';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useToast } from '@/hooks/use-toast';
 
 interface WishlistItem {
   id: number;
@@ -37,7 +36,6 @@ const parsePrice = (value: unknown) => {
 export default function WishlistPage() {
   const { user, isLoading } = useAuth();
   const { addItem } = useCart();
-  const { toast } = useToast();
   const [items, setItems] = useState<WishlistItem[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -91,7 +89,6 @@ export default function WishlistPage() {
     const response = await authFetch(`/wishlist/item/${wishlistItemId}`, { method: 'DELETE' });
     if (response.ok) {
       setItems((prev) => prev.filter((item) => item.id !== wishlistItemId));
-      toast({ title: 'Removed from wishlist' });
     }
   };
 

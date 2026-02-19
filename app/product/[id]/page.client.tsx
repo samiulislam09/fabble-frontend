@@ -5,7 +5,6 @@ import { Product } from '@/lib/products';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/lib/cart-context';
 import { useUI } from '@/lib/ui-context';
-import { useToast } from '@/hooks/use-toast';
 import ProductCard from '@/components/product-card';
 import { Heart, ShoppingCart, Check, XCircle } from 'lucide-react';
 
@@ -40,7 +39,6 @@ interface ProductDetailsClientProps {
 export default function ProductDetailsClient({ product, relatedProducts }: ProductDetailsClientProps) {
     const { addItem } = useCart();
     const { openCart } = useUI();
-    const { toast } = useToast();
     const { user } = useAuth();
 
     const productImages = parseImages(product.images);
@@ -226,14 +224,7 @@ export default function ProductDetailsClient({ product, relatedProducts }: Produ
     };
 
     const handleAddToCart = () => {
-        if (hasVariants && !selectedVariant) {
-            toast({
-                title: 'Select Options',
-                description: `Please select all options before adding to cart.`,
-                variant: 'destructive'
-            });
-            return;
-        }
+        if (hasVariants && !selectedVariant) return;
 
         const price = parsePrice(selectedVariant?.price ?? product.price);
 
@@ -256,10 +247,6 @@ export default function ProductDetailsClient({ product, relatedProducts }: Produ
             variantId: selectedVariant?.id,
             variantType: selectedVariant?.variantType?.name || 'Variant',
             variantValue: selectedVariant?.value,
-        });
-        toast({
-            title: 'Added to cart',
-            description: `${product.name} x${quantity} has been added to your cart`,
         });
         openCart();
     };
@@ -379,7 +366,7 @@ export default function ProductDetailsClient({ product, relatedProducts }: Produ
                         <div className="flex items-center border border-border rounded-lg">
                             <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="px-4 py-2 text-foreground hover:bg-muted transition">−</button>
                             <span className="px-6 py-2 font-semibold">{quantity}</span>
-                            <button onClick={() => setQuantity(quantity + 1)} className="px-4 py-2 text-foreground hover:bg-muted transition">+</button>
+                            <button onClick={() => setQuantity(Math.min(quantity + 1, 10))} disabled={quantity >= 10} className="px-4 py-2 text-foreground hover:bg-muted transition disabled:opacity-40 disabled:cursor-not-allowed">+</button>
                         </div>
                         <Button
                             size="lg"
@@ -401,10 +388,7 @@ export default function ProductDetailsClient({ product, relatedProducts }: Produ
                         </Button>
                         <button
                             onClick={async () => {
-                                if (!user) {
-                                    toast({ title: 'Sign in required', description: 'Please sign in to save items to your wishlist.', variant: 'destructive' });
-                                    return;
-                                }
+                                if (!user) return;
                                 const response = await authFetch('/wishlist/add', {
                                     method: 'POST',
                                     headers: { 'Content-Type': 'application/json' },
@@ -412,9 +396,6 @@ export default function ProductDetailsClient({ product, relatedProducts }: Produ
                                 });
                                 if (response.ok) {
                                     setIsWishlisted(true);
-                                    toast({ title: 'Added to wishlist' });
-                                } else {
-                                    toast({ title: 'Wishlist', description: 'Could not update wishlist.', variant: 'destructive' });
                                 }
                             }}
                             className="px-6 py-3 rounded-lg border border-border hover:bg-muted transition"
