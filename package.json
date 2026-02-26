@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "NODE_OPTIONS='--no-deprecation' next build",
-    "dev": "NODE_OPTIONS='--no-deprecation' next dev",
+    "build": "node init && NODE_OPTIONS='--no-deprecation' next build",
+    "dev": "node init && NODE_OPTIONS='--no-deprecation' next dev",
     "lint": "eslint .",
-    "start": "NODE_OPTIONS='--no-deprecation' next start"
+    "start": "node init && NODE_OPTIONS='--no-deprecation' next start"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

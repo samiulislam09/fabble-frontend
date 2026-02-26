@@ -86,7 +86,7 @@ export default function HeroSlider({ carousels = [] }: HeroSliderProps) {
               </Button>
             </Link>
             <Link href="/about">
-              <Button size="lg" variant="outline" className="h-14 px-8 text-base border-white/30 text-white hover:bg-white/10 hover:text-white rounded-none tracking-widest uppercase font-semibold backdrop-blur-sm">
+              <Button size="lg" variant="outline" className="h-14 px-8 text-base border-white/30 text-white bg-transparent hover:bg-white/10 hover:text-white rounded-none tracking-widest uppercase font-semibold backdrop-blur-sm">
                 Our Story
               </Button>
             </Link>

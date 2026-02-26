@@ -1,3 +1,4 @@
+"use client"
 import Link from 'next/link';
 import { Facebook, Twitter, Instagram, Linkedin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -6,26 +7,26 @@ import Image from 'next/image';
 
 export default function Footer() {
   return (
-    <footer className="bg-foreground/95 text-background mt-24">
+    <footer className="mt-24 border-t border-border/70 bg-gradient-to-br from-[#1f1a15] via-[#2f241b] to-[#1d2f33] text-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
           {/* Brand */}
           <div className="space-y-4">
             <Image height={100} width={100} src="/fabble.png" alt="Fabble" className="h-26 w-auto brightness-0 invert" />
-            <p className="text-background/70 text-sm leading-relaxed">
+            <p className="text-background/75 text-sm leading-relaxed">
               Curating premium fashion that celebrates individuality and timeless elegance.
             </p>
             <div className="flex gap-3 pt-4">
-              <Button variant="ghost" size="icon" className="h-9 w-9 text-background hover:bg-background/20">
+              <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full border border-white/20 text-background hover:bg-background/20" onClick={()=> window.open('https://www.facebook.com/fabble32', '_blank')}>
                 <Facebook className="h-4 w-4" />
               </Button>
-              <Button variant="ghost" size="icon" className="h-9 w-9 text-background hover:bg-background/20">
+              <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full border border-white/20 text-background hover:bg-background/20" onClick={()=> window.open('https://www.twitter.com/fabble32', '_blank')}>
                 <Twitter className="h-4 w-4" />
               </Button>
-              <Button variant="ghost" size="icon" className="h-9 w-9 text-background hover:bg-background/20">
+              <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full border border-white/20 text-background hover:bg-background/20" onClick={()=> window.open('https://www.instagram.com/fabble32', '_blank')}>
                 <Instagram className="h-4 w-4" />
               </Button>
-              <Button variant="ghost" size="icon" className="h-9 w-9 text-background hover:bg-background/20">
+              <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full border border-white/20 text-background hover:bg-background/20" onClick={()=> window.open('https://www.linkedin.com/company/fabble32', '_blank')}>
                 <Linkedin className="h-4 w-4" />
               </Button>
             </div>
@@ -33,7 +34,7 @@ export default function Footer() {
 
           {/* Quick Links */}
           <div className="space-y-4">
-            <h4 className="font-semibold text-background text-sm uppercase tracking-wider">Explore</h4>
+            <h4 className="font-semibold text-background text-sm uppercase tracking-[0.16em]">Explore</h4>
             <ul className="space-y-3 text-sm">
               <li>
                 <Link href="/" className="text-background/70 hover:text-background transition">
@@ -60,7 +61,7 @@ export default function Footer() {
 
           {/* Support */}
           <div className="space-y-4">
-            <h4 className="font-semibold text-background text-sm uppercase tracking-wider">Support</h4>
+            <h4 className="font-semibold text-background text-sm uppercase tracking-[0.16em]">Support</h4>
             <ul className="space-y-3 text-sm">
               <li>
                 <Link href="#" className="text-background/70 hover:text-background transition">
@@ -87,7 +88,7 @@ export default function Footer() {
 
           {/* Contact */}
           <div className="space-y-4">
-            <h4 className="font-semibold text-background text-sm uppercase tracking-wider">Get in Touch</h4>
+            <h4 className="font-semibold text-background text-sm uppercase tracking-[0.16em]">Get in Touch</h4>
             <ul className="space-y-3 text-sm text-background/70">
               <li>
                 <a href="mailto:fashionfabble@gmail.com" className="hover:text-background transition">
@@ -107,7 +108,7 @@ export default function Footer() {
         </div>
 
         {/* Divider */}
-        <Separator className="bg-background/20" />
+        <Separator className="bg-background/25" />
 
         {/* Bottom */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-8 pt-8 text-sm text-background/60">

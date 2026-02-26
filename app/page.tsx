@@ -37,11 +37,11 @@ export default async function Home() {
       <HeroSlider carousels={carousels} />
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 space-y-24">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-24 space-y-20 md:space-y-24">
 
         {/* New Arrivals */}
         {newArrivals.length > 0 && (
-          <section>
+          <section className="animate-fade-in-up">
             <div className="mb-12">
               <p className="text-sm font-semibold text-primary tracking-widest uppercase mb-2">Just Landed</p>
               <h2 className="text-4xl md:text-5xl font-serif text-foreground">New Arrivals</h2>
@@ -51,7 +51,7 @@ export default async function Home() {
         )}
 
         {/* Trending Products */}
-        <section>
+        <section className="animate-fade-in-up">
           <div className="mb-12">
             <p className="text-sm font-semibold text-primary tracking-widest uppercase mb-2">What's Hot</p>
             <h2 className="text-4xl md:text-5xl font-serif text-foreground">Trending Now</h2>
@@ -60,7 +60,7 @@ export default async function Home() {
         </section>
 
         {/* Features Section */}
-        <section className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <section className="glass-panel rounded-3xl p-8 md:p-12 grid grid-cols-1 md:grid-cols-3 gap-8">
           {[
             { title: 'Curated Selection', description: 'Hand-picked pieces from premium brands' },
             { title: 'Free Shipping', description: 'On orders over $50 to anywhere' },
@@ -68,8 +68,8 @@ export default async function Home() {
           ].map((feature, idx) => (
             <div key={idx} className="text-center space-y-3">
               <div className="flex justify-center mb-4">
-                <div className="w-14 h-14 bg-primary/10 rounded-full flex items-center justify-center">
-                  <div className="w-8 h-8 bg-primary rounded-full" />
+                <div className="w-14 h-14 bg-primary/12 rounded-full flex items-center justify-center shadow-[inset_0_0_0_1px_rgba(255,255,255,0.3)]">
+                  <div className="w-8 h-8 bg-gradient-to-br from-primary to-accent rounded-full" />
                 </div>
               </div>
               <h3 className="text-xl font-semibold text-foreground">{feature.title}</h3>
@@ -79,7 +79,7 @@ export default async function Home() {
         </section>
 
         {/* Category Section */}
-        <section>
+        <section className="animate-fade-in-up">
           <div className="mb-12 flex flex-col items-center text-center">
             <p className="text-sm font-semibold text-primary tracking-widest uppercase mb-3">Shop Collections</p>
             <h2 className="text-4xl md:text-6xl font-serif text-foreground mb-4">Browse by Category</h2>
@@ -104,7 +104,7 @@ export default async function Home() {
         )} */}
 
         {/* Best Sellers */}
-        <section>
+        <section className="animate-fade-in-up">
           <div className="mb-12">
             <p className="text-sm font-semibold text-primary tracking-widest uppercase mb-2">Customer Favorites</p>
             <h2 className="text-4xl md:text-5xl font-serif text-foreground">Best Sellers</h2>
@@ -124,7 +124,7 @@ export default async function Home() {
         )} */}
 
         {/* All Products */}
-        <section>
+        <section className="animate-fade-in-up">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8 mb-12">
             <div>
               <p className="text-sm font-semibold text-primary tracking-widest uppercase mb-2">Complete Collection</p>
@@ -157,7 +157,7 @@ export default async function Home() {
         )} */}
 
         {/* Newsletter Section */}
-        <section className="relative rounded-3xl bg-gradient-to-br from-primary/20 to-accent/10 p-12 md:p-16 overflow-hidden">
+        <section className="relative rounded-3xl border border-border/70 bg-gradient-to-br from-primary/20 via-card to-accent/10 p-12 md:p-16 overflow-hidden shadow-[0_30px_80px_rgba(48,31,16,0.14)]">
           <div className="absolute inset-0 opacity-20">
             <div className="absolute top-0 right-0 w-96 h-96 bg-primary/20 rounded-full blur-3xl -translate-y-1/2" />
           </div>
@@ -179,4 +179,3 @@ export default async function Home() {
     </div>
   );
 }
-
