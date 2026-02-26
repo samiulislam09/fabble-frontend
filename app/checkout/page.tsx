@@ -42,7 +42,6 @@ export default function CheckoutPage() {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
-    email: '',
     phone: '',
     address: '',
     shippingZone: '',
@@ -77,7 +76,6 @@ export default function CheckoutPage() {
       ...prev,
       firstName: prev.firstName || nameParts[0] || '',
       lastName: prev.lastName || nameParts.slice(1).join(' ') || '',
-      email: prev.email || user.email || '',
       phone: prev.phone || user.mobile || ''
     }));
   }, [user]);
@@ -95,7 +93,6 @@ export default function CheckoutPage() {
       const missingFields: string[] = [];
       if (!formData.firstName.trim()) missingFields.push('First Name');
       if (!formData.lastName.trim()) missingFields.push('Last Name');
-      if (!formData.email.trim()) missingFields.push('Email');
       if (!formData.phone.trim()) missingFields.push('Phone');
       if (!formData.shippingZone) {
         setZoneError(true);
@@ -209,18 +206,6 @@ export default function CheckoutPage() {
                         required
                       />
                     </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      required
-                    />
                   </div>
 
                   <div className="space-y-2">

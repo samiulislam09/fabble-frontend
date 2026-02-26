@@ -38,13 +38,13 @@ export default function Header({ categories = [] }: HeaderProps) {
 
   return (
     <>
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-border/40">
+      <header className="sticky top-0 z-40 glass-panel border-b border-border/70 shadow-[0_8px_30px_rgba(44,34,25,0.06)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Top Navigation Bar */}
           <div className="flex items-center justify-between h-20">
             {/* Logo */}
             <Link href="/" className="flex-shrink-0 group">
-              <Image height={100} width={100} src="/fabble.png" alt="Fabble" className="h-18 w-auto" />
+              <Image height={120} width={120} src="/fabble.png" alt="Fabble" className="h-16 w-auto transition-transform duration-300 group-hover:scale-[1.03]" />
             </Link>
 
             {/* Search Bar - Hidden on mobile */}
@@ -56,7 +56,7 @@ export default function Header({ categories = [] }: HeaderProps) {
               {isMobile && (
                 <Dialog open={isSearchOpen} onOpenChange={setIsSearchOpen}>
                   <DialogTrigger asChild>
-                    <Button variant="ghost" size="icon" className="hover:bg-secondary/50">
+                    <Button variant="ghost" size="icon" className="hover:bg-secondary/70">
                       <Search className="h-5 w-5" />
                     </Button>
                   </DialogTrigger>
@@ -99,7 +99,7 @@ export default function Header({ categories = [] }: HeaderProps) {
               {!isLoading && user && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="hover:bg-secondary/50">
+                    <Button variant="ghost" size="icon" className="hover:bg-secondary/70">
                       <User className="h-5 w-5" />
                     </Button>
                   </DropdownMenuTrigger>
@@ -135,7 +135,7 @@ export default function Header({ categories = [] }: HeaderProps) {
                 variant="ghost"
                 size="icon"
                 onClick={openCart}
-                className="relative hover:bg-secondary/50"
+                className="relative hover:bg-secondary/70"
               >
                 <ShoppingCart className="h-10 w-10" />
                 {totalItems > 0 && (
@@ -149,7 +149,7 @@ export default function Header({ categories = [] }: HeaderProps) {
               {isMobile && (
                 <Sheet>
                   <SheetTrigger asChild>
-                    <Button variant="ghost" size="icon" className="hover:bg-secondary/50">
+                    <Button variant="ghost" size="icon" className="hover:bg-secondary/70">
                       <Menu className="h-5 w-5" />
                     </Button>
                   </SheetTrigger>
@@ -252,7 +252,7 @@ export default function Header({ categories = [] }: HeaderProps) {
           </div>
 
           {/* Category Navigation - Hidden on mobile */}
-          {!isMobile && <CategoryNav categories={categories} />}
+          {!isMobile && <div className="border-t border-border/60"><CategoryNav categories={categories} /></div>}
         </div>
       </header>
 
