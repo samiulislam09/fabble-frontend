@@ -44,7 +44,7 @@ export default function ShopClient({ initialProducts, initialCategories }: ShopC
     const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || '');
 
     const [selectedSubcategory, setSelectedSubcategory] = useState(searchParams.get('subcategory') || '');
-    const [priceRange, setPriceRange] = useState([0, 250]);
+    const [priceRange, setPriceRange] = useState([0, 5000]);
     const [selectedColor, setSelectedColor] = useState('');
     const [sortBy, setSortBy] = useState('newest');
     const [showFilters, setShowFilters] = useState(false);

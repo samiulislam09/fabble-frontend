@@ -8,7 +8,7 @@ export default function AboutPage() {
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-primary/80 to-accent/80 text-primary-foreground py-20 px-4">
         <div className="max-w-4xl mx-auto text-center space-y-6">
-          <h1 className="text-5xl font-bold">About StyleHub</h1>
+          <h1 className="text-5xl font-bold">About Fabble</h1>
           <p className="text-xl opacity-90">
             Discover a world of fashion where quality meets style, and every piece tells a story.
           </p>
@@ -23,7 +23,7 @@ export default function AboutPage() {
             <div>
               <h2 className="text-4xl font-bold text-foreground mb-6">Our Story</h2>
               <p className="text-foreground/80 text-lg leading-relaxed mb-4">
-                StyleHub was founded in 2015 with a simple mission: to make premium fashion accessible to everyone. What started as a small boutique in New York City has grown into a global online destination for fashion enthusiasts.
+                Fabble was founded in 2015 with a simple mission: to make premium fashion accessible to everyone. What started as a small boutique in New York City has grown into a global online destination for fashion enthusiasts.
               </p>
               <p className="text-foreground/80 text-lg leading-relaxed mb-4">
                 We believe that fashion is more than just clothing—it's a form of self-expression. Every piece in our collection is carefully curated to ensure quality, style, and value for our customers.
@@ -35,7 +35,7 @@ export default function AboutPage() {
             <div className="aspect-square rounded-lg overflow-hidden shadow-lg">
               <img
                 src="https://images.unsplash.com/photo-1441986300352-7e3dee89fbfa?w=500&h=500&fit=crop"
-                alt="StyleHub Store"
+                alt="Fabble Store"
                 className="w-full h-full object-cover"
               />
             </div>
@@ -81,8 +81,8 @@ export default function AboutPage() {
         </section>
 
         {/* Why Choose Us */}
-        <section className="bg-white rounded-lg border border-border p-12">
-          <h2 className="text-4xl font-bold text-foreground text-center mb-12">Why Choose StyleHub?</h2>
+        {/* <section className="bg-white rounded-lg border border-border p-12">
+          <h2 className="text-4xl font-bold text-foreground text-center mb-12">Why Choose Fabble?</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               {
@@ -123,39 +123,7 @@ export default function AboutPage() {
               </div>
             ))}
           </div>
-        </section>
-
-        {/* Team Section */}
-        <section>
-          <h2 className="text-4xl font-bold text-foreground text-center mb-12">Our Team</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                name: 'Sarah Johnson',
-                role: 'Founder & CEO',
-                image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300&h=300&fit=crop',
-              },
-              {
-                name: 'Michael Chen',
-                role: 'Head of Design',
-                image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop',
-              },
-              {
-                name: 'Emily Rodriguez',
-                role: 'Head of Operations',
-                image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=300&h=300&fit=crop',
-              },
-            ].map((member, idx) => (
-              <div key={idx} className="text-center space-y-4">
-                <div className="aspect-square rounded-lg overflow-hidden">
-                  <img src={member.image || "/placeholder.svg"} alt={member.name} className="w-full h-full object-cover" />
-                </div>
-                <h3 className="text-xl font-semibold text-foreground">{member.name}</h3>
-                <p className="text-foreground/80">{member.role}</p>
-              </div>
-            ))}
-          </div>
-        </section>
+        </section> */}
 
         {/* Contact Section */}
         <section className="bg-gradient-to-r from-primary/10 to-accent/10 rounded-lg p-12 text-center space-y-6">
@@ -164,9 +132,9 @@ export default function AboutPage() {
             Have questions or feedback? We'd love to hear from you. Contact our team anytime.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <span className="text-foreground">Email: info@stylehub.com</span>
+            <span className="text-foreground">Email: fashionfabble@gmail.com</span>
             <span className="hidden sm:inline text-border">•</span>
-            <span className="text-foreground">Phone: +1 (555) 123-4567</span>
+            <span className="text-foreground">Phone: +8801624257024</span>
           </div>
           <Link href="/shop">
             <Button size="lg">Start Shopping Now</Button>

@@ -1,16 +1,15 @@
 import React from "react"
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { Cormorant_Garamond, Manrope } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { AuthProvider } from '@/lib/auth-context'
 import { CartProvider } from '@/lib/cart-context'
 import { UIProvider } from '@/lib/ui-context'
-import Header from '@/components/header'
-import Footer from '@/components/footer'
-import FloatingCallButton from '@/components/floating-call-button'
+import SiteShell from '@/components/site-shell'
 import './globals.css'
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
+const manrope = Manrope({ subsets: ["latin"], variable: "--font-sans" });
+const cormorant = Cormorant_Garamond({ subsets: ["latin"], variable: "--font-display", weight: ["500", "600", "700"] });
 
 import { getCategories } from '@/lib/categories';
 
@@ -26,16 +25,13 @@ export default async function RootLayout({
 
   return (
     <html lang="en" suppressHydrationWarning>
-      <body suppressHydrationWarning className={`${inter.variable} font-sans antialiased bg-background text-foreground`}>
+      <body suppressHydrationWarning className={`${manrope.variable} ${cormorant.variable} font-sans antialiased bg-background text-foreground`}>
         <UIProvider>
           <AuthProvider>
             <CartProvider>
-              <Header categories={categories} />
-              <main className="min-h-screen">
+              <SiteShell categories={categories}>
                 {children}
-              </main>
-              <Footer />
-              <FloatingCallButton />
+              </SiteShell>
             </CartProvider>
           </AuthProvider>
         </UIProvider>

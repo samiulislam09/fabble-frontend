@@ -4,7 +4,6 @@
 export interface CheckoutFormData {
     firstName: string;
     lastName: string;
-    email: string;
     phone: string;
     address: string;
     shippingZone: 'INSIDE_DHAKA' | 'OUTSIDE_DHAKA' | string;
@@ -73,8 +72,7 @@ export async function createOrder(formData: CheckoutFormData, items: CartItem[],
         const payload = {
             customer: {
                 name: `${formData.firstName} ${formData.lastName}`.trim(),
-                phone: formData.phone,
-                email: formData.email
+                phone: formData.phone
             },
             shippingAddress: {
                 line1: formData.address,

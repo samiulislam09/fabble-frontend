@@ -2,23 +2,19 @@
 import { getProducts, getProduct } from '@/lib/products';
 import ProductDetailsClient from './page.client';
 import { Metadata } from 'next';
+import { redirect } from 'next/navigation';
 
 interface PageProps {
-  params: Promise<{
-    id: string;
-  }>;
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params;
   const product = await getProduct(id);
 
-  console.log(product, "product");
-
   if (!product) {
-    return {
-      title: 'Product Not Found',
-    };
+    return { title: 'Product Not Found' };
   }
 
   return {
@@ -27,12 +23,17 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-export default async function ProductDetailsPage({ params }: PageProps) {
+export default async function ProductDetailsPage({ params, searchParams }: PageProps) {
   const { id } = await params;
+  const sp = await searchParams;
+
+  // Facebook ad traffic → show dedicated landing page
+  if (sp.fbclid) {
+    redirect(`/landing/${id}`);
+  }
+
   const product = await getProduct(id);
 
-  // Fetch all products to find related ones (simplified recommendation logic)
-  // In a real app, you might have a dedicated related products endpoint
   const productsResponse = await getProducts();
   const allProducts = productsResponse?.products || [];
 
